@@ -1,259 +1,160 @@
+import { loginUser, registerUser, logout, saveData, loadData } from './cdn.js';
 import { loginUser, registerUser, logoutUser, saveGameData, loadGameData, subscribeToRank } from './cdn.js';
 
 // --- CONFIGURAÇÃO CHROMA (CORES POR NÍVEL) ---
-const colors = [
+const themes = [
     { hex: "#00d2ff", name: "Cyber Blue" },   // 0-9
     { hex: "#00ff88", name: "Matrix Green" }, // 10-19
     { hex: "#ffd700", name: "Midas Gold" },   // 20-29
     { hex: "#ff0055", name: "Crimson Red" },  // 30-39
     { hex: "#9d00ff", name: "Void Purple" },  // 40-49
     { hex: "#ffffff", name: "Pure Light" }    // 50+
-];
 
-// --- DADOS DO JOGO ---
+// --- CONFIGURAÇÃO DAS 15 EVOLUÇÕES ---
 const upgrades = [
-    { id: 0, name: "Poder do Mouse", cost: 15, cps: 0, click: 0.5, icon: "fa-mouse-pointer" }, // Item especial
-    { id: 1, name: "Auto-Clicker v1", cost: 100, cps: 1, click: 0, icon: "fa-robot" },
-    { id: 2, name: "Script Kiddie", cost: 500, cps: 5, click: 0, icon: "fa-laptop-code" },
-    { id: 3, name: "Servidor Dedicado", cost: 3000, cps: 20, click: 0, icon: "fa-server" },
-    { id: 4, name: "Fazenda de GPU", cost: 10000, cps: 80, click: 0, icon: "fa-memory" },
-    { id: 5, name: "IA Neural", cost: 50000, cps: 250, click: 0, icon: "fa-brain" },
-    { id: 6, name: "Computação Quântica", cost: 200000, cps: 1000, click: 0, icon: "fa-atom" },
-    { id: 7, name: "Manipulador do Tempo", cost: 1500000, cps: 5000, click: 0, icon: "fa-clock" },
-    { id: 8, name: "Matriz Galáctica", cost: 50000000, cps: 20000, click: 0, icon: "fa-galaxy" }
+    { name: "Poder do Clique", cost: 15, cps: 0, power: 0.5, icon: "fa-mouse-pointer" }, // Nível de Cor
+    { name: "Autoclicker V1", cost: 100, cps: 1, power: 0, icon: "fa-robot" },
+    { name: "Hacker Estagiário", cost: 1100, cps: 8, power: 0, icon: "fa-user-ninja" },
+    { name: "Servidor Dedicado", cost: 12000, cps: 47, power: 0, icon: "fa-server" },
+    { name: "Fazenda de GPUs", cost: 130000, cps: 260, power: 0, icon: "fa-microchip" },
+    { name: "Botnet Global", cost: 1400000, cps: 1400, power: 0, icon: "fa-network-wired" },
+    { name: "IA Consciente", cost: 20000000, cps: 7800, power: 0, icon: "fa-brain" },
+    { name: "Nuvem Quântica", cost: 330000000, cps: 44000, power: 0, icon: "fa-cloud" },
+    { name: "Reator Nuclear", cost: 5100000000, cps: 260000, power: 0, icon: "fa-atom" },
+    { name: "Sonda Espacial", cost: 75000000000, cps: 1600000, power: 0, icon: "fa-satellite" },
+    { name: "Dobra Espacial", cost: 1000000000000, cps: 10000000, power: 0, icon: "fa-rocket" },
+    { name: "Buraco Negro", cost: 14000000000000, cps: 65000000, power: 0, icon: "fa-circle" },
+    { name: "Multiverso", cost: 200000000000000, cps: 400000000, power: 0, icon: "fa-infinity" },
+    { name: "Deus da Máquina", cost: 5000000000000000, cps: 2500000000, power: 0, icon: "fa-eye" },
+    { name: "Fim dos Tempos", cost: 999999999999999999, cps: 999999999999, power: 0, icon: "fa-skull" }
 ];
 
-let gameState = {
-    diamonds: 0,
-    inventory: Array(upgrades.length).fill(0)
-};
+let state = { diamonds: 0, inventory: Array(15).fill(0) };
 
-// --- FUNÇÕES EXPOSTAS AO HTML (WINDOW) ---
+// --- FUNÇÕES DE INTERAÇÃO ---
 window.tryLogin = async () => {
-    try {
-        await loginUser(document.getElementById('email').value, document.getElementById('password').value);
-    } catch(e) { showToast(e.message, 'error'); }
+    try { await loginUser(document.getElementById('email').value, document.getElementById('password').value); }
+    catch(e) { showToast(e.message); }
 };
-
 window.tryRegister = async () => {
-    try {
-        await registerUser(document.getElementById('email').value, document.getElementById('password').value);
-        startGame();
-    } catch(e) { showToast(e.message, 'error'); }
+    try { await registerUser(document.getElementById('email').value, document.getElementById('password').value); initGame(); }
+    catch(e) { showToast(e.message); }
 };
+window.startGuestMode = () => { document.getElementById('p-mode').innerText = "OFFLINE"; initGame(); };
+window.doLogout = logout;
 
-window.startGuestMode = () => {
-    document.getElementById('p-mode').innerText = "OFFLINE";
-    startGame();
-};
-
-window.doLogout = logoutUser;
-
-window.addEventListener('auth-success', () => {
+window.addEventListener('logged-in', () => {
     document.getElementById('p-mode').innerText = "ONLINE";
-    document.getElementById('p-mode').style.color = "#00ff88";
-    startGame();
+    initGame();
 });
 
-// --- INICIALIZAÇÃO ---
-async function startGame() {
+async function initGame() {
     document.getElementById('auth-overlay').classList.add('hidden');
     document.getElementById('game-app').classList.remove('hidden');
-
-    const data = await loadGameData();
-    if (data) {
-        gameState.diamonds = data.diamonds || 0;
-        gameState.inventory = data.inventory || Array(upgrades.length).fill(0);
-    }
     
-    // Inicia Loops
+    const saved = await loadData();
+    if(saved) state = { ...state, ...saved };
+    
     renderStore();
     updateUI();
-    updateCursorTheme(); // Aplica a cor correta ao carregar
+    updateChroma();
     
-    setInterval(gameLoop, 100); // Loop de Diamantes
-    setInterval(() => saveGameData(gameState), 5000); // Auto-Save
+    setInterval(() => {
+        const cps = upgrades.reduce((acc, u, i) => acc + (state.inventory[i] * u.cps), 0);
+        if(cps > 0) { state.diamonds += cps/10; updateUI(cps); }
+    }, 100);
     
-    subscribeToRank(updateLeaderboard);
+    setInterval(() => saveData(state), 10000);
 }
 
-// --- LÓGICA DO JOGO ---
-function gameLoop() {
-    // Calcula CPS (Cliques Por Segundo automáticos)
-    const cps = upgrades.reduce((acc, u, i) => acc + (gameState.inventory[i] * u.cps), 0);
-    if(cps > 0) {
-        gameState.diamonds += cps / 10;
-        updateUI(cps);
-    }
-}
-
-// CLIQUE MANUAL
 document.getElementById('click-area').addEventListener('mousedown', (e) => {
-    // Fórmula: 1 + (Nível do Mouse * 0.5)
-    const power = 1 + (gameState.inventory[0] * 0.5); 
-    gameState.diamonds += power;
-    
-    // Efeitos
-    animateClick();
-    showFloatingText(e.clientX, e.clientY, `+${formatNum(power)}`);
+    const power = 1 + (state.inventory[0] * 0.5);
+    state.diamonds += power;
     updateUI();
+    showFloat(e.clientX, e.clientY, `+${Math.floor(power)}`);
 });
 
-// COMPRA
-window.buyUpgrade = (id) => {
-    const u = upgrades[id];
-    // Preço aumenta 15% a cada compra
-    const cost = Math.floor(u.cost * Math.pow(1.15, gameState.inventory[id]));
-    
-    if (gameState.diamonds >= cost) {
-        gameState.diamonds -= cost;
-        gameState.inventory[id]++;
-        
-        // Se comprou o Mouse (ID 0), checa se muda de cor
-        if(id === 0) updateCursorTheme();
-        
+window.buy = (i) => {
+    const u = upgrades[i];
+    const cost = Math.floor(u.cost * Math.pow(1.15, state.inventory[i]));
+    if(state.diamonds >= cost) {
+        state.diamonds -= cost;
+        state.inventory[i]++;
+        if(i === 0) updateChroma();
         renderStore();
         updateUI();
-    } else {
-        showToast("Diamantes Insuficientes!", "error");
     }
 };
 
-// --- LÓGICA DE CORES (A NOVIDADE) ---
-function updateCursorTheme() {
-    const mouseLvl = gameState.inventory[0];
-    
-    // Lógica: Divide nível por 10. (Ex: Nv 25 / 10 = 2.5 -> Índice 2 -> Ouro)
-    let colorIndex = Math.floor(mouseLvl / 10);
-    
-    // Limita ao máximo do array
-    if(colorIndex >= colors.length) colorIndex = colors.length - 1;
-    
-    const theme = colors[colorIndex];
-    
-    // INJETA A COR NO CSS (Isso muda tudo que usa var(--dynamic-color))
+function updateChroma() {
+    const lvl = state.inventory[0];
+    const idx = Math.min(Math.floor(lvl / 10), themes.length - 1);
+    const theme = themes[idx];
     document.documentElement.style.setProperty('--dynamic-color', theme.hex);
-    document.documentElement.style.setProperty('--dynamic-glow', theme.hex + "66"); // Adiciona transparência
-    
-    // Atualiza textos
+    document.documentElement.style.setProperty('--dynamic-glow', theme.hex + '66');
     document.getElementById('current-color-name').innerText = theme.name;
-    document.getElementById('cursor-lvl').innerText = mouseLvl;
-    
-    // Feedback visual se mudou de tier (exato múltiplo de 10)
-    if(mouseLvl > 0 && mouseLvl % 10 === 0) {
-        showToast(`EVOLUÇÃO CROMÁTICA: ${theme.name}!`, "success");
-    }
+    document.getElementById('cursor-lvl').innerText = lvl;
 }
 
-// --- UI & RENDERIZAÇÃO ---
 function renderStore() {
     const list = document.getElementById('upgrades-list');
-    list.innerHTML = "";
-    
-    upgrades.forEach((u, i) => {
-        const cost = Math.floor(u.cost * Math.pow(1.15, gameState.inventory[i]));
-        const canBuy = gameState.diamonds >= cost;
-        
-        const div = document.createElement('div');
-        div.className = `upgrade-card ${canBuy ? '' : 'locked'}`;
-        div.onclick = () => window.buyUpgrade(i);
-        div.innerHTML = `
-            <div class="u-icon"><i class="fas ${u.icon}"></i></div>
-            <div class="u-info">
-                <b>${u.name}</b>
-                <span class="cost">💎 ${formatNum(cost)}</span>
+    list.innerHTML = upgrades.map((u, i) => {
+        const cost = Math.floor(u.cost * Math.pow(1.15, state.inventory[i]));
+        return `
+            <div class="upgrade-card" onclick="window.buy(${i})" id="upg-${i}">
+                <div class="u-icon"><i class="fas ${u.icon}"></i></div>
+                <div class="u-info">
+                    <b>${u.name}</b>
+                    <span class="cost">💎 ${format(cost)}</span>
+                </div>
+                <div class="u-count">${state.inventory[i]}</div>
             </div>
-            <div class="u-count">${gameState.inventory[i]}</div>
         `;
-        list.appendChild(div);
-    });
+    }).join('');
 }
 
 function updateUI(cps = 0) {
-    document.getElementById('diamonds-val').innerText = formatNum(Math.floor(gameState.diamonds));
-    if(cps > 0) document.getElementById('cps-val').innerText = `${formatNum(cps)} / seg`;
-    
-    // Atualiza estado visual (travado/destravado) da loja em tempo real
-    const cards = document.getElementsByClassName('upgrade-card');
-    if(cards.length === upgrades.length) {
-        upgrades.forEach((u, i) => {
-            const cost = Math.floor(u.cost * Math.pow(1.15, gameState.inventory[i]));
-            if(gameState.diamonds >= cost) cards[i].classList.remove('locked');
-            else cards[i].classList.add('locked');
-        });
-    }
-}
-
-function updateLeaderboard(data) {
-    const list = document.getElementById('leaderboard');
-    list.innerHTML = "";
-    data.forEach(p => {
-        const isMe = currentUser && p.id === currentUser.uid;
-        list.innerHTML += `
-            <li class="${isMe ? 'me' : ''}">
-                <span>#${p.rank} ${p.name}</span>
-                <span style="color:var(--gold)">💎 ${formatNum(Math.floor(p.diamonds))}</span>
-            </li>
-        `;
+    document.getElementById('diamonds-val').innerText = format(Math.floor(state.diamonds));
+    document.getElementById('cps-val').innerText = `${format(cps)} / s`;
+    upgrades.forEach((u, i) => {
+        const cost = Math.floor(u.cost * Math.pow(1.15, state.inventory[i]));
+        const el = document.getElementById(`upg-${i}`);
+        if(el) state.diamonds >= cost ? el.classList.remove('locked') : el.classList.add('locked');
     });
 }
 
 // --- UTILITÁRIOS ---
-function animateClick() {
-    const c = document.getElementById('main-cursor');
-    c.style.transform = "scale(0.8) rotate(-5deg)";
-    setTimeout(() => c.style.transform = "scale(1) rotate(0)", 80);
+function format(n) {
+    if(n >= 1e12) return (n/1e12).toFixed(2) + "T";
+    if(n >= 1e9) return (n/1e9).toFixed(2) + "B";
+    if(n >= 1e6) return (n/1e6).toFixed(2) + "M";
+    if(n >= 1e3) return (n/1e3).toFixed(1) + "K";
+    return n.toLocaleString();
 }
 
-function showFloatingText(x, y, txt) {
-    const el = document.createElement('div');
-    el.className = 'float-text';
-    el.innerText = txt;
-    el.style.left = `${x}px`;
-    el.style.top = `${y}px`;
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 800);
-}
-
-function showToast(msg, type) {
-    const t = document.createElement('div');
-    t.className = 'toast';
-    t.innerText = msg;
-    t.style.borderLeft = `5px solid ${type === 'error' ? '#ff0055' : '#00ff88'}`;
+function showToast(m) {
+    const t = document.createElement('div'); t.className = 'toast'; t.innerText = m;
     document.getElementById('toast-container').appendChild(t);
     setTimeout(() => t.remove(), 3000);
 }
 
-function formatNum(num) {
-    if(num >= 1e9) return (num/1e9).toFixed(2) + "B";
-    if(num >= 1e6) return (num/1e6).toFixed(2) + "M";
-    if(num >= 1e3) return (num/1e3).toFixed(1) + "K";
-    return num.toLocaleString();
+function showFloat(x,y,t) {
+    const e = document.createElement('div'); e.className = 'float-text'; e.style.left = x+'px'; e.style.top = y+'px'; e.innerText = t;
+    document.body.appendChild(e); setTimeout(() => e.remove(), 800);
 }
 
-// Abas
+// ABAS E ATALHOS
 window.switchTab = (t) => {
-    document.querySelectorAll('.tab-content').forEach(e => e.classList.add('hidden'));
-    document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(`tab-${t}`).classList.remove('hidden');
     event.currentTarget.classList.add('active');
 };
 
-// Teclado (Atalhos PC)
 document.addEventListener('keydown', (e) => {
-    if(e.code === 'Space') {
-        const clickArea = document.getElementById('click-area');
-        // Pega coordenadas do centro do elemento para a animação
-        const rect = clickArea.getBoundingClientRect();
-        const evt = new MouseEvent('mousedown', {
-            clientX: rect.left + rect.width / 2,
-            clientY: rect.top + rect.height / 2
-        });
-        clickArea.dispatchEvent(evt);
-    }
-    if(e.ctrlKey && e.key === 's') {
+    if(e.code === 'Space') { 
         e.preventDefault();
-        saveGameData(gameState);
-        showToast("Jogo Salvo (Ctrl+S)", "success");
+        document.getElementById('click-area').dispatchEvent(new MouseEvent('mousedown'));
     }
+    if(e.ctrlKey && e.key === 's') { e.preventDefault(); saveData(state); showToast("Salvo!"); }
 });
