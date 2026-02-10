@@ -1,111 +1,125 @@
 :root {
-    --bg: #0a0a0f;
-    --panel: #121218;
+    --bg-dark: #0b101a;      /* Fundo principal escuro */
+    --bg-panel: #151b26;     /* Fundo dos painéis */
+    --accent: #2196f3;       /* Azul padrão */
     --text: #ffffff;
-    --dynamic-color: #00d2ff; /* Alterada via JS */
-    --dynamic-glow: rgba(0, 210, 255, 0.4);
+    --green: #4caf50;
+    --gold: #ffc107;
+    --cursor-color: #ffffff; /* Muda dinamicamente */
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Rajdhani', sans-serif;
-    height: 100vh;
-    overflow: hidden;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; outline: none; font-family: 'Rubik', sans-serif; }
 
-/* TELA DE LOGIN */
-#auth-overlay {
-    position: fixed; inset: 0; z-index: 100;
-    background: radial-gradient(circle at center, #1a1a2e, #000);
+body { background-color: var(--bg-dark); color: var(--text); height: 100vh; overflow: hidden; }
+
+/* TELAS DE AUTH E MODAL */
+#auth-overlay, .modal {
+    position: fixed; inset: 0; z-index: 999;
+    background: rgba(0,0,0,0.85);
     display: flex; justify-content: center; align-items: center;
+    backdrop-filter: blur(5px);
 }
-.glass-panel {
-    background: rgba(20, 20, 30, 0.95);
-    padding: 2.5rem; border-radius: 20px; width: 90%; max-width: 400px;
-    border: 1px solid #333; text-align: center;
+.hidden { display: none !important; }
+
+.panel, .modal-content {
+    background: var(--bg-panel); padding: 2rem; border-radius: 12px;
+    width: 90%; max-width: 400px; text-align: center;
+    border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
-.badges { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
-.badge { font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; font-weight: bold; color: #000; }
-.badge.green { background: #00ff88; }
-.badge.orange { background: #ffaa00; }
-.badge.blue { background: #00d2ff; }
+.panel h1 { font-family: 'Roboto Mono', monospace; margin-bottom: 20px; font-size: 2rem; }
+.highlight { color: var(--accent); }
 
-.neon-text { color: var(--dynamic-color); text-shadow: 0 0 10px var(--dynamic-color); }
-.input-group { background: #000; margin: 12px 0; padding: 12px; border-radius: 8px; border: 1px solid #333; display: flex; align-items: center; }
-.input-group input { background: none; border: none; color: white; margin-left: 10px; width: 100%; }
-
-.btn-primary, .btn-secondary, .btn-guest {
-    width: 100%; padding: 14px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; border: none; transition: 0.3s;
+input {
+    width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: 1px solid #333;
+    background: #080c14; color: white;
 }
-.btn-primary { background: var(--dynamic-color); color: #000; }
-.btn-secondary { background: transparent; border: 1px solid var(--dynamic-color); color: var(--dynamic-color); }
-.btn-guest { background: #1a1a1a; border: 1px dashed #444; color: #888; margin-top: 25px; }
 
-/* HUD E GRID */
-#game-app { display: flex; flex-direction: column; height: 100vh; }
-.hud-header { height: 60px; background: #000; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
-.game-grid { flex: 1; display: flex; flex-direction: column; }
+.auth-btns { display: flex; gap: 10px; margin-top: 15px; }
+button { cursor: pointer; border: none; border-radius: 6px; padding: 12px; font-weight: bold; transition: 0.2s; flex: 1; }
+.btn-main { background: var(--accent); color: white; }
+.btn-sec { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+.btn-guest { background: #333; color: #aaa; width: 100%; margin-top: 15px; }
+button:active { transform: scale(0.96); }
 
-/* ÁREA DE CLIQUE */
-.zone-click {
-    flex: 1.2; display: flex; flex-direction: column; justify-content: center; align-items: center;
-    background: radial-gradient(circle at center, #151525 0%, #050505 100%);
+/* LAYOUT PRINCIPAL */
+#game-app { display: flex; height: 100vh; width: 100%; }
+
+/* ÁREA DE CLIQUE (ESQUERDA) */
+.click-zone {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: radial-gradient(circle at center, #1a253a 0%, var(--bg-dark) 100%);
     position: relative;
 }
-#diamonds-val { font-size: 4rem; font-weight: 700; color: #fff; }
-#click-area {
-    width: 250px; height: 250px; position: relative;
-    display: flex; justify-content: center; align-items: center; cursor: pointer;
+
+.top-bar {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: 15px; display: flex; justify-content: space-between; align-items: center;
+}
+.actions button { padding: 8px 12px; margin-left: 5px; background: rgba(255,255,255,0.1); color: white; border-radius: 4px; }
+
+.score-display { text-align: center; margin-bottom: 40px; }
+#score { font-size: 4rem; font-weight: 700; font-family: 'Roboto Mono', monospace; }
+.cps { background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px; margin-top: 10px; font-size: 0.9rem; }
+
+#click-pad {
+    width: 250px; height: 250px; display: flex; justify-content: center; align-items: center;
+    position: relative; cursor: pointer;
 }
 #main-cursor {
-    font-size: 100px; color: var(--dynamic-color);
-    filter: drop-shadow(0 0 15px var(--dynamic-glow));
-    transition: 0.1s; z-index: 5;
+    font-size: 100px; color: var(--cursor-color);
+    filter: drop-shadow(0 0 15px var(--cursor-color));
+    transition: transform 0.05s; z-index: 2;
 }
-.cursor-ring {
-    position: absolute; width: 100%; height: 100%;
-    border: 2px dashed var(--dynamic-color); border-radius: 50%; opacity: 0.2;
-    animation: rotate 20s linear infinite;
+#click-pad:active #main-cursor { transform: scale(0.9) rotate(-10deg); }
+
+/* LOJA (DIREITA) */
+.shop-zone {
+    width: 350px; background: #080a0f; border-left: 1px solid #222;
+    display: flex; flex-direction: column;
 }
-.cursor-ring.inner { width: 70%; height: 70%; animation: rotate 10s linear infinite reverse; }
+.shop-header { padding: 15px; background: #000; border-bottom: 1px solid #222; text-align: center; }
+.shop-content { flex: 1; overflow-y: auto; padding: 10px; }
 
-/* LOJA */
-.zone-manage { flex: 1; background: #0c0c12; border-top: 1px solid #222; overflow: hidden; display: flex; flex-direction: column; }
-.tabs { display: flex; background: #000; }
-.tab-btn { flex: 1; padding: 15px; background: none; border: none; color: #555; cursor: pointer; border-bottom: 2px solid transparent; }
-.tab-btn.active { color: #fff; border-bottom-color: var(--dynamic-color); background: #161620; }
-
-.upgrade-card {
-    display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #1a1a1a;
-    background: #121218; transition: 0.2s; cursor: pointer;
+/* ITEMS DA LOJA */
+.shop-item {
+    display: flex; align-items: center; background: #131720;
+    margin-bottom: 5px; padding: 10px; border-radius: 6px;
+    cursor: pointer; border: 1px solid transparent; position: relative;
+    overflow: hidden;
 }
-.upgrade-card.locked { opacity: 0.3; filter: grayscale(1); }
-.u-icon { width: 50px; font-size: 1.5rem; color: var(--dynamic-color); text-align: center; }
-.u-info { flex: 1; margin-left: 10px; }
-.u-info b { font-size: 0.9rem; }
-.cost { color: #ffb700; font-size: 0.8rem; font-weight: bold; display: block; }
-.u-count { font-size: 1.5rem; font-weight: 900; color: #222; }
+.shop-item:hover { background: #1a202e; border-color: #333; }
+.shop-item.locked { opacity: 0.5; filter: grayscale(1); pointer-events: none; }
 
-/* UTILITÁRIOS */
-.hidden { display: none !important; }
-@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.item-icon { width: 50px; font-size: 24px; text-align: center; color: var(--accent); }
+.item-info { flex: 1; padding-left: 10px; }
+.item-name { font-weight: bold; font-size: 0.9rem; display: block; }
+.item-cost { font-size: 0.8rem; color: var(--green); }
+.item-count { font-size: 1.5rem; font-weight: bold; color: #444; margin-right: 10px; font-family: 'Roboto Mono'; }
 
-/* TOAST E FLOATING TEXT */
-#toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; }
-.toast { background: #333; padding: 10px 20px; border-radius: 20px; margin-bottom: 5px; font-size: 0.8rem; border-left: 4px solid var(--dynamic-color); }
-.float-text { position: fixed; color: var(--dynamic-color); font-weight: bold; pointer-events: none; animation: float 0.8s ease-out forwards; }
-@keyframes float { to { transform: translateY(-80px); opacity: 0; } }
+/* LEADERBOARD LISTA */
+.rank-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333; }
+.rank-row.me { color: var(--gold); font-weight: bold; }
 
-/* RESPONSIVO PC */
-@media (min-width: 800px) {
-    .game-grid { flex-direction: row; }
-    .zone-manage { border-top: none; border-left: 1px solid #222; }
-    #shortcuts-panel {
-        position: fixed; bottom: 20px; left: 20px; background: rgba(0,0,0,0.7);
-        padding: 15px; border-radius: 10px; border: 1px solid #333; font-size: 0.8rem;
+/* FLUTUANTE DE TEXTO */
+.float-txt {
+    position: absolute; font-weight: bold; font-size: 1.2rem; pointer-events: none;
+    animation: floatUp 0.8s ease-out forwards;
+    color: var(--cursor-color); text-shadow: 0 0 5px black;
+}
+@keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-50px); } }
+
+/* CSS PARA CELULAR (Mobile First Adapter) */
+@media (max-width: 768px) {
+    #game-app { flex-direction: column; }
+    .shop-zone { width: 100%; height: 40%; border-left: none; border-top: 2px solid var(--accent); }
+    .click-zone { height: 60%; }
+    #main-cursor { font-size: 80px; }
+    .pc-hints { display: none; }
+}
+
+/* APENAS NO PC */
+@media (min-width: 769px) {
+    .pc-hints {
+        margin-top: 50px; font-family: 'Roboto Mono'; color: #555; font-size: 0.8rem;
     }
-    .key { background: #444; padding: 2px 6px; border-radius: 4px; color: #fff; }
 }
-@media (max-width: 799px) { #shortcuts-panel { display: none; } }
