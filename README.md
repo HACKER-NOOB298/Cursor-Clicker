@@ -7,7 +7,7 @@ Um jogo clicker estilo Cookie Clicker, mas com cliques! Totalmente online com au
 ---
 
 ## 🚀 NOVO AQUI? COMECE POR AQUI.
-# SITE:
+# SITE: https://hacker-noob298.github.io/Cursor-Clicker/
 ## ✨ Funcionalidades
 
 ### 🎯 Gameplay Completo
