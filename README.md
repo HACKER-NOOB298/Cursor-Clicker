@@ -7,6 +7,7 @@ Um jogo clicker estilo Cookie Clicker, mas com cliques! Totalmente online com au
 ---
 
 ## 🚀 NOVO AQUI? COMECE POR AQUI.
+# SITE:
 ## ✨ Funcionalidades
 
 ### 🎯 Gameplay Completo
