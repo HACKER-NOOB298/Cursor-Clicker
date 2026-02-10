@@ -1,45 +1,43 @@
-# Firebase
+# --- FIREBASE ---
+# Logs e arquivos de cache do Firebase
 .firebase/
-.firebaserc
-firebase-debug.log
-firestore-debug.log
+*.log
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
 
-# Node modules (caso use npm)
+# --- DEPENDÊNCIAS ---
+# Caso você use npm para instalar o firebase-tools ou servidores locais
 node_modules/
+package-lock.json
+npm-debug.log*
 
-# OS files
+# --- SEGURANÇA (IMPORTANTE) ---
+# Se você decidir mover as chaves do cdn.js para um arquivo separado:
+# config.js
+# .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- SISTEMA E EDITORES ---
 .DS_Store
 Thumbs.db
 desktop.ini
-
-# Editor files
 .vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
 
-# Logs
-*.log
-npm-debug.log*
-
-# Temporary files
-*.tmp
-*.temp
+# --- TEMPORÁRIOS E BUILDS ---
 .cache/
-
-# Environment variables (se usar)
-.env
-.env.local
-.env.production
-
-# Build files (caso gere)
 dist/
 build/
+*.tmp
+*.temp
 
-# Backup files
+# --- BACKUPS ---
 *.bak
 *.backup
 *~
-
-# Firebase config with real credentials (opcional - se quiser proteger)
-# js/firebase-config.js
