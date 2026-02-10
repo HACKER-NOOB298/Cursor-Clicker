@@ -1,0 +1,140 @@
+:root {
+    --bg: #08080c;
+    --panel: #121218;
+    --text: #ffffff;
+    --gold: #ffb700;
+    
+    /* ESTA COR MUDA SOZINHA VIA JAVASCRIPT */
+    --dynamic-color: #00d2ff; 
+    --dynamic-glow: rgba(0, 210, 255, 0.4);
+}
+
+* { box-sizing: border-box; user-select: none; margin: 0; padding: 0; outline: none; }
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* --- BADGES --- */
+.badges { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; }
+.badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; text-transform: uppercase; color: #000; }
+.badge.green { background: #00ff88; }
+.badge.orange { background: #ffaa00; }
+.badge.blue { background: #00d2ff; }
+
+/* --- LOGIN --- */
+#auth-overlay {
+    position: fixed; inset: 0; z-index: 2000;
+    background: radial-gradient(circle at center, #1a1a2e, #000);
+    display: flex; justify-content: center; align-items: center;
+}
+.glass-panel {
+    background: rgba(20, 20, 30, 0.95);
+    border: 1px solid #333;
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    padding: 2rem; border-radius: 15px; width: 90%; max-width: 380px; text-align: center;
+}
+.neon-text { color: var(--dynamic-color); text-shadow: 0 0 10px var(--dynamic-color); transition: 0.5s; }
+.input-group { background: #000; margin: 10px 0; padding: 12px; border-radius: 5px; border: 1px solid #333; display: flex; align-items: center; }
+.input-group i { color: #666; margin-right: 10px; }
+input { background: none; border: none; color: white; width: 100%; font-family: sans-serif; }
+
+.btn-primary, .btn-secondary, .btn-guest {
+    width: 100%; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.2s;
+}
+.btn-primary { background: var(--dynamic-color); border: none; color: #000; }
+.btn-secondary { background: transparent; border: 1px solid var(--dynamic-color); color: var(--dynamic-color); }
+.btn-guest { background: #222; border: 1px dashed #555; color: #aaa; margin-top: 20px; }
+.btn-guest:hover { color: #fff; border-color: #fff; }
+
+/* --- JOGO --- */
+#game-app { display: flex; flex-direction: column; height: 100vh; }
+.hud-header { height: 60px; background: #000; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; border-bottom: 1px solid #222; }
+.rank-badge { background: #333; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; }
+.game-grid { flex: 1; display: flex; flex-direction: column; }
+
+/* LADO ESQUERDO (CLIQUE) */
+.zone-click {
+    flex: 1.5; position: relative;
+    background: radial-gradient(circle at center, #151520 0%, #050505 80%);
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    overflow: hidden;
+}
+#diamonds-val { font-size: 3.5rem; font-weight: 700; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
+
+#click-area {
+    width: 240px; height: 240px; position: relative;
+    display: flex; justify-content: center; align-items: center; cursor: pointer;
+    margin: 30px 0;
+}
+#main-cursor {
+    font-size: 90px;
+    color: var(--dynamic-color); /* COR DINÂMICA */
+    filter: drop-shadow(0 0 15px var(--dynamic-glow));
+    transition: transform 0.05s, color 0.5s, filter 0.5s;
+    z-index: 10;
+}
+.cursor-ring {
+    position: absolute; width: 100%; height: 100%;
+    border: 2px dashed var(--dynamic-color); /* COR DINÂMICA */
+    border-radius: 50%; opacity: 0.3;
+    animation: spin 20s linear infinite;
+    transition: border-color 0.5s;
+}
+.cursor-ring.inner { width: 70%; height: 70%; animation: spin 10s linear infinite reverse; }
+
+.level-indicator { font-size: 0.8rem; color: #666; margin-top: 20px; font-family: monospace; }
+#current-color-name { color: var(--dynamic-color); font-weight: bold; }
+
+/* LADO DIREITO (LOJA) */
+.zone-manage { flex: 1; background: #0c0c0f; display: flex; flex-direction: column; border-top: 1px solid #333; overflow: hidden; }
+.tabs { display: flex; background: #000; }
+.tab-btn { flex: 1; padding: 15px; background: #111; color: #555; border: none; cursor: pointer; border-bottom: 2px solid #222; }
+.tab-btn.active { color: #fff; background: #1a1a22; border-bottom: 2px solid var(--dynamic-color); }
+.tab-content { flex: 1; overflow-y: auto; padding-bottom: 50px; }
+
+/* CARDS DE UPGRADE */
+.upgrade-card {
+    display: flex; align-items: center; padding: 15px;
+    border-bottom: 1px solid #222; transition: 0.2s; background: #131318;
+}
+.upgrade-card:hover { background: #1a1a25; }
+.upgrade-card.locked { opacity: 0.4; filter: grayscale(1); pointer-events: none; }
+.u-icon { width: 50px; font-size: 1.5rem; text-align: center; color: var(--dynamic-color); }
+.u-info b { display: block; font-size: 0.95rem; }
+.cost { color: var(--gold); font-size: 0.85rem; font-weight: bold; }
+.u-count { font-size: 1.4rem; font-weight: 900; color: #333; margin-left: auto; }
+
+/* RANKING */
+#leaderboard li { padding: 12px 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
+#leaderboard li.me { background: rgba(255,255,255,0.05); border-left: 3px solid var(--dynamic-color); }
+
+/* UTILITÁRIOS */
+.hidden { display: none !important; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* TOAST E PARTICULAS */
+#toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; }
+.toast { background: #222; color: white; padding: 10px 20px; margin-bottom: 10px; border-radius: 30px; border: 1px solid #444; font-size: 0.9rem; }
+.float-text {
+    position: fixed; pointer-events: none; color: var(--dynamic-color); /* COR DINÂMICA */
+    font-weight: 900; font-size: 1.5rem; animation: floatUp 0.8s ease-out forwards; z-index: 100;
+    text-shadow: 0 0 5px black;
+}
+@keyframes floatUp { to { transform: translateY(-100px); opacity: 0; } }
+
+/* RESPONSIVO */
+@media(min-width: 800px) {
+    .game-grid { flex-direction: row; }
+    .zone-manage { border-top: none; border-left: 1px solid #333; }
+    /* ATALHOS NO PC */
+    #shortcuts-panel {
+        position: fixed; bottom: 20px; left: 20px;
+        background: rgba(0,0,0,0.6); padding: 15px; border-radius: 10px; border: 1px solid #333; color: #888; pointer-events: none;
+    }
+    .key { background: #222; border: 1px solid #444; padding: 2px 6px; border-radius: 4px; color: #fff; margin: 0 3px; }
+}
+@media(max-width: 799px) { #shortcuts-panel { display: none; } }

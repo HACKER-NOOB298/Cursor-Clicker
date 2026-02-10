@@ -1,0 +1,45 @@
+# Firebase
+.firebase/
+.firebaserc
+firebase-debug.log
+firestore-debug.log
+
+# Node modules (caso use npm)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Environment variables (se usar)
+.env
+.env.local
+.env.production
+
+# Build files (caso gere)
+dist/
+build/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Firebase config with real credentials (opcional - se quiser proteger)
+# js/firebase-config.js
