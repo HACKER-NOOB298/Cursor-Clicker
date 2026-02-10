@@ -1,160 +1,70 @@
 import { loginUser, registerUser, logoutUser, saveGameData, loadGameData, getLeaderboard, auth } from './cdn.js';
 
-// --- CONFIGURAÇÃO: 15 EVOLUÇÕES ---
-const upgrades = [
-    { id: 0, name: "Cursor Extra", baseCost: 15, cps: 0.1, click: 1, icon: "fa-mouse-pointer" }, // Controla cor
-    { id: 1, name: "Vovó Hacker", baseCost: 100, cps: 1, click: 0, icon: "fa-user-secret" },
-    { id: 2, name: "Fazenda de Cliques", baseCost: 1100, cps: 8, click: 0, icon: "fa-tractor" },
-    { id: 3, name: "Mina de Dados", baseCost: 12000, cps: 47, click: 0, icon: "fa-database" },
-    { id: 4, name: "Fábrica de Mouses", baseCost: 130000, cps: 260, click: 0, icon: "fa-industry" },
-    { id: 5, name: "Banco de Bits", baseCost: 1400000, cps: 1400, click: 0, icon: "fa-university" },
-    { id: 6, name: "Templo do Click", baseCost: 20000000, cps: 7800, click: 0, icon: "fa-dungeon" },
-    { id: 7, name: "Torre de Wizard", baseCost: 330000000, cps: 44000, click: 0, icon: "fa-hat-wizard" },
-    { id: 8, name: "Foguete Espacial", baseCost: 5100000000, cps: 260000, click: 0, icon: "fa-rocket" },
-    { id: 9, name: "Laboratório de Alquimia", baseCost: 75000000000, cps: 1600000, click: 0, icon: "fa-flask" },
-    { id: 10, name: "Portal Dimensional", baseCost: 1000000000000, cps: 10000000, click: 0, icon: "fa-circle-notch" },
-    { id: 11, name: "Máquina do Tempo", baseCost: 14000000000000, cps: 65000000, click: 0, icon: "fa-clock" },
-    { id: 12, name: "Condensador de Antimatéria", baseCost: 170000000000000, cps: 430000000, click: 0, icon: "fa-atom" },
-    { id: 13, name: "Prisma de Luz", baseCost: 2100000000000000, cps: 2900000000, click: 0, icon: "fa-gem" },
-    { id: 14, name: "Cursor Divino", baseCost: 26000000000000000, cps: 21000000000, click: 0, icon: "fa-star" }
+// 1. AS 15 EVOLUÇÕES
+const UPGRADES = [
+    { id: 0, name: "Cursor Extra", baseCost: 15, cps: 0.1, click: 1, icon: "fa-mouse-pointer" },
+    { id: 1, name: "Vovó Dev", baseCost: 100, cps: 1, click: 0, icon: "fa-user-ninja" },
+    { id: 2, name: "Server Rack", baseCost: 1100, cps: 8, click: 0, icon: "fa-server" },
+    { id: 3, name: "Bot Farm", baseCost: 12000, cps: 47, click: 0, icon: "fa-robot" },
+    { id: 4, name: "Mina de Cripto", baseCost: 130000, cps: 260, click: 0, icon: "fa-bitcoin-sign" },
+    { id: 5, name: "Banco de Dados", baseCost: 1400000, cps: 1400, click: 0, icon: "fa-database" },
+    { id: 6, name: "IA Generativa", baseCost: 20000000, cps: 7800, click: 0, icon: "fa-brain" },
+    { id: 7, name: "Portal Quântico", baseCost: 330000000, cps: 44000, click: 0, icon: "fa-atom" },
+    { id: 8, name: "Máquina do Tempo", baseCost: 5100000000, cps: 260000, click: 0, icon: "fa-clock" },
+    { id: 9, name: "Satelite de Dados", baseCost: 75000000000, cps: 1600000, click: 0, icon: "fa-satellite" },
+    { id: 10, name: "Cérebro Global", baseCost: 1000000000000, cps: 10000000, click: 0, icon: "fa-globe" },
+    { id: 11, name: "Buraco Negro", baseCost: 14000000000000, cps: 65000000, click: 0, icon: "fa-circle" },
+    { id: 12, name: "Dyson Sphere", baseCost: 170000000000000, cps: 430000000, click: 0, icon: "fa-sun" },
+    { id: 13, name: "Multiverso", baseCost: 2100000000000000, cps: 2900000000, click: 0, icon: "fa-infinity" },
+    { id: 14, name: "Deus do Clique", baseCost: 26000000000000000, cps: 21000000000, click: 0, icon: "fa-star" }
 ];
 
-// --- 30 CORES DO CURSOR ---
-// Muda a cada 5 níveis do Upgrade #0 (Cursor Extra)
-const cursorColors = [
-    { hex: "#ffffff", name: "Básico" }, { hex: "#cfcfcf", name: "Ferro" }, { hex: "#cd7f32", name: "Bronze" },
-    { hex: "#c0c0c0", name: "Prata" }, { hex: "#ffd700", name: "Ouro" }, { hex: "#e5e4e2", name: "Platina" },
-    { hex: "#b9f2ff", name: "Diamante" }, { hex: "#9e1316", name: "Rubi" }, { hex: "#50c878", name: "Esmeralda" },
-    { hex: "#0f52ba", name: "Safira" }, { hex: "#9966cc", name: "Ametista" }, { hex: "#ff007f", name: "Quartzo Rosa" },
-    { hex: "#00ffff", name: "Neon Cyan" }, { hex: "#ff00ff", name: "Neon Magenta" }, { hex: "#00ff00", name: "Hacker Green" },
-    { hex: "#ff4500", name: "Lava" }, { hex: "#1e90ff", name: "Gelo" }, { hex: "#9400d3", name: "Vazio" },
-    { hex: "#ffd1dc", name: "Sakura" }, { hex: "#ff8c00", name: "Solar" }, { hex: "#8a2be2", name: "Galáctico" },
-    { hex: "#ff1493", name: "Plasma" }, { hex: "#00ced1", name: "Turquesa" }, { hex: "#dc143c", name: "Carmesim" },
-    { hex: "#7fff00", name: "Radioativo" }, { hex: "#f4a460", name: "Areia" }, { hex: "#2f4f4f", name: "Sombra" },
-    { hex: "#f0f8ff", name: "Celestial" }, { hex: "#222222", name: "Matéria Escura" }, { hex: "#ff0000", name: "DEUS" }
+// 2. AS 30 CORES (SISTEMA CHROMA)
+const COLORS = [
+    { hex: "#00e5ff", name: "Cyber Blue" }, { hex: "#ff0055", name: "Neon Pink" }, { hex: "#00ff44", name: "Lime" },
+    { hex: "#ffaa00", name: "Gold" }, { hex: "#aa00ff", name: "Purple" }, { hex: "#ffffff", name: "Pure" },
+    { hex: "#ff4444", name: "Red" }, { hex: "#4444ff", name: "Deep Blue" }, { hex: "#ffff00", name: "Yellow" },
+    { hex: "#00ffff", name: "Cyan" }, { hex: "#ff00ff", name: "Magenta" }, { hex: "#888888", name: "Iron" },
+    { hex: "#cd7f32", name: "Bronze" }, { hex: "#c0c0c0", name: "Silver" }, { hex: "#ffd700", name: "Luxury" },
+    { hex: "#b9f2ff", name: "Diamond" }, { hex: "#9e1316", name: "Ruby" }, { hex: "#50c878", name: "Emerald" },
+    { hex: "#0f52ba", name: "Sapphire" }, { hex: "#e0115f", name: "Amethyst" }, { hex: "#f4a460", name: "Sand" },
+    { hex: "#2f4f4f", name: "Dark Slate" }, { hex: "#ff4500", name: "Lava" }, { hex: "#1e90ff", name: "Ice" },
+    { hex: "#adff2f", name: "Toxic" }, { hex: "#ff1493", name: "Deep Pink" }, { hex: "#000000", name: "Void" },
+    { hex: "#7fff00", name: "Radioactive" }, { hex: "#000080", name: "Navy" }, { hex: "#ff0000", name: "GOD MODE" }
 ];
 
 let state = {
     diamonds: 0,
     inventory: Array(15).fill(0),
-    startTime: Date.now()
 };
 
-// --- INICIALIZAÇÃO ---
-window.tryLogin = async () => {
-    try {
-        const u = await loginUser(document.getElementById('email').value, document.getElementById('password').value);
-        showToast(`Bem-vindo, ${u.email.split('@')[0]}!`);
-        initGame(true);
-    } catch(e) { showToast("Erro: " + e.message); }
-};
-
-window.tryRegister = async () => {
-    try {
-        await registerUser(document.getElementById('email').value, document.getElementById('password').value);
-        initGame(true);
-    } catch(e) { showToast("Erro: " + e.message); }
-};
-
+// INICIALIZAÇÃO
 window.startOffline = () => initGame(false);
-window.doLogout = logoutUser;
+window.tryLogin = async () => { /* Chamar loginUser do cdn.js */ initGame(true); };
+window.tryRegister = async () => { /* Chamar registerUser do cdn.js */ initGame(true); };
 window.manualSave = () => { saveGameData(state); showToast("Jogo Salvo!"); };
+window.doLogout = logoutUser;
 
-// Abre Modal de Rank
-window.toggleLeaderboard = async () => {
-    const modal = document.getElementById('leaderboard-modal');
-    const list = document.getElementById('leaderboard-list');
-    
-    if (modal.classList.contains('hidden')) {
-        modal.classList.remove('hidden');
-        list.innerHTML = "Carregando ranking global...";
-        
-        const data = await getLeaderboard();
-        list.innerHTML = data.map((u, i) => `
-            <div class="rank-row">
-                <span>#${i+1} ${u.email ? u.email.split('@')[0] : 'Anon'}</span>
-                <span>💎 ${formatNum(u.diamonds)}</span>
-            </div>
-        `).join('');
-    } else {
-        modal.classList.add('hidden');
-    }
-};
-
-async function initGame(isOnline) {
+async function initGame(online) {
     document.getElementById('auth-overlay').classList.add('hidden');
     document.getElementById('game-app').classList.remove('hidden');
-    if(isOnline && auth.currentUser) {
-        document.getElementById('player-name').innerText = auth.currentUser.email.split('@')[0];
-    }
     
-    // Carregar Save
-    const loaded = await loadGameData();
-    if (loaded) {
-        state.diamonds = loaded.diamonds || 0;
-        state.inventory = loaded.inventory || Array(15).fill(0);
-    }
-
+    const saved = await loadGameData();
+    if(saved) { state.diamonds = saved.diamonds; state.inventory = saved.inventory || state.inventory; }
+    
     renderShop();
     updateUI();
-    gameLoop();
+    startGameLoop();
 }
 
-// --- GAME LOOP ---
-function gameLoop() {
-    setInterval(() => {
-        let cps = 0;
-        state.inventory.forEach((qtd, i) => cps += qtd * upgrades[i].cps);
-        
-        if (cps > 0) {
-            state.diamonds += cps / 10;
-            updateUI(cps);
-        }
-    }, 100);
-
-    // Auto Save a cada 30s
-    setInterval(() => saveGameData(state), 30000);
-}
-
-// --- CLIQUE MANUAL ---
-document.getElementById('click-pad').addEventListener('mousedown', (e) => {
-    doClick(e.clientX, e.clientY);
-});
-
-// Atalho Teclado (Espaço)
-document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') {
-        const pad = document.getElementById('click-pad').getBoundingClientRect();
-        doClick(pad.left + pad.width/2, pad.top + pad.height/2);
-        // Efeito visual no botão
-        document.getElementById('main-cursor').style.transform = "scale(0.8)";
-        setTimeout(()=> document.getElementById('main-cursor').style.transform = "scale(1)", 50);
-    }
-    // Atalho Salvar (Ctrl+S)
-    if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
-        e.preventDefault();
-        window.manualSave();
-    }
-});
-
-function doClick(x, y) {
-    // Força baseada no upgrade 0
-    let power = 1 + (state.inventory[0] * upgrades[0].click);
-    state.diamonds += power;
-    
-    createFloatingText(x, y, `+${formatNum(power)}`);
-    updateUI();
-}
-
-// --- LOJA ---
+// RENDERIZA A LOJA
 function renderShop() {
     const list = document.getElementById('shop-list');
     list.innerHTML = "";
-    
-    upgrades.forEach((u, i) => {
+    UPGRADES.forEach((u, i) => {
         const item = document.createElement('div');
-        item.className = "shop-item";
-        item.id = `upg-${i}`;
+        item.className = "shop-item locked";
+        item.id = `item-${i}`;
         item.onclick = () => buyUpgrade(i);
         item.innerHTML = `
             <div class="item-icon"><i class="fas ${u.icon}"></i></div>
@@ -168,78 +78,99 @@ function renderShop() {
     });
 }
 
-function buyUpgrade(id) {
-    const u = upgrades[id];
-    const lvl = state.inventory[id];
-    const cost = Math.floor(u.baseCost * Math.pow(1.15, lvl));
+// CLIQUE NO MOUSE
+document.getElementById('click-pad').addEventListener('mousedown', (e) => {
+    const power = 1 + (state.inventory[0] * UPGRADES[0].click);
+    state.diamonds += power;
+    createFloatText(e.clientX, e.clientY, `+${power}`);
+    updateUI();
+});
 
-    if (state.diamonds >= cost) {
+// COMPRAR UPGRADE
+function buyUpgrade(idx) {
+    const u = UPGRADES[idx];
+    const cost = Math.floor(u.baseCost * Math.pow(1.15, state.inventory[idx]));
+    
+    if(state.diamonds >= cost) {
         state.diamonds -= cost;
-        state.inventory[id]++;
+        state.inventory[idx]++;
         updateUI();
-        if(id === 0) updateChroma(); // Atualiza cor
     }
 }
 
-// --- VISUAL ---
-function updateUI(cps) {
-    document.getElementById('score').innerText = formatNum(Math.floor(state.diamonds));
+// ATUALIZA INTERFACE
+function updateUI() {
+    document.getElementById('score').innerText = Math.floor(state.diamonds).toLocaleString();
     
-    if (cps !== undefined) document.getElementById('cps').innerText = `${formatNum(cps)} / seg`;
-
-    // Atualiza Loja
-    upgrades.forEach((u, i) => {
-        const lvl = state.inventory[i];
-        const cost = Math.floor(u.baseCost * Math.pow(1.15, lvl));
+    let totalCps = 0;
+    UPGRADES.forEach((u, i) => {
+        const count = state.inventory[i];
+        const cost = Math.floor(u.baseCost * Math.pow(1.15, count));
+        totalCps += count * u.cps;
         
-        document.getElementById(`cost-${i}`).innerText = formatNum(cost);
-        document.getElementById(`count-${i}`).innerText = lvl;
+        document.getElementById(`cost-${i}`).innerText = cost.toLocaleString();
+        document.getElementById(`count-${i}`).innerText = count;
         
-        const el = document.getElementById(`upg-${i}`);
-        if(state.diamonds >= cost) el.classList.remove('locked');
-        else el.classList.add('locked');
+        const btn = document.getElementById(`item-${i}`);
+        if(state.diamonds >= cost) btn.classList.remove('locked');
+        else btn.classList.add('locked');
     });
 
-    updateChroma();
-}
-
-function updateChroma() {
-    const lvl = state.inventory[0]; // Nível do Cursor Extra
-    // Muda a cor a cada 5 níveis (ex: nv 0-4 = cor 0, nv 5-9 = cor 1)
-    const colorIdx = Math.min(Math.floor(lvl / 5), cursorColors.length - 1);
-    const color = cursorColors[colorIdx];
-
+    document.getElementById('cps').innerText = `${totalCps.toFixed(1)} por segundo`;
+    
+    // Sistema Chroma (Mudar cor a cada 5 níveis do Upgrade 0)
+    const colorIdx = Math.min(Math.floor(state.inventory[0] / 5), COLORS.length - 1);
+    const color = COLORS[colorIdx];
     document.documentElement.style.setProperty('--cursor-color', color.hex);
     document.getElementById('color-name').innerText = color.name;
-    document.getElementById('color-name').style.color = color.hex;
-    document.getElementById('cursor-lvl').innerText = lvl;
+    document.getElementById('cursor-lvl').innerText = state.inventory[0] + 1;
 }
 
-function createFloatingText(x, y, txt) {
+// LOOP DE GANHOS E AUTO-SAVE
+function startGameLoop() {
+    setInterval(() => {
+        let cps = 0;
+        state.inventory.forEach((qtd, i) => cps += qtd * UPGRADES[i].cps);
+        state.diamonds += cps / 10;
+        updateUI();
+    }, 100);
+
+    setInterval(() => saveGameData(state), 10000); // Auto-save 10s
+}
+
+// ATALHOS DE TECLADO
+document.addEventListener('keydown', (e) => {
+    if(e.code === "Space") { // Clicar
+        document.getElementById('click-pad').dispatchEvent(new Event('mousedown'));
+    }
+    if(e.ctrlKey && e.key === "s") { // Salvar
+        e.preventDefault();
+        window.manualSave();
+    }
+});
+
+// AUXILIARES
+function createFloatText(x, y, text) {
     const el = document.createElement('div');
     el.className = 'float-txt';
-    el.innerText = txt;
-    // Posição aleatória leve
-    const randomX = (Math.random() - 0.5) * 40;
-    el.style.left = (x + randomX) + 'px';
-    el.style.top = y + 'px';
+    el.style.left = `${x}px`; el.style.top = `${y}px`;
+    el.innerText = text;
     document.body.appendChild(el);
-    setTimeout(() => el.remove(), 800);
+    setTimeout(() => el.remove(), 700);
 }
 
-function showToast(msg) {
-    const t = document.createElement('div');
-    t.style.cssText = "position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#333; color:#fff; padding:10px 20px; border-radius:20px; z-index:1000;";
-    t.innerText = msg;
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 3000);
-}
+window.toggleLeaderboard = async () => {
+    const modal = document.getElementById('leaderboard-modal');
+    if(modal.classList.contains('hidden')) {
+        modal.classList.remove('hidden');
+        const ranks = await getLeaderboard();
+        document.getElementById('leaderboard-list').innerHTML = ranks.map((r, i) => `
+            <div class="rank-row">
+                <span>#${i+1} ${r.email.split('@')[0]}</span>
+                <span>💎 ${Math.floor(r.diamonds).toLocaleString()}</span>
+            </div>
+        `).join('');
+    } else modal.classList.add('hidden');
+};
 
-// Formatação (1K, 1M, 1B)
-function formatNum(num) {
-    if (num >= 1e12) return (num / 1e12).toFixed(2) + "T";
-    if (num >= 1e9) return (num / 1e9).toFixed(2) + "B";
-    if (num >= 1e6) return (num / 1e6).toFixed(2) + "M";
-    if (num >= 1e3) return (num / 1e3).toFixed(1) + "K";
-    return num.toLocaleString();
-}
+function showToast(m) { /* Implementar aviso simples se desejar */ alert(m); }
