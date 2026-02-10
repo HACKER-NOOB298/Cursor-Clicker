@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cursor Clicker v1.2</title>
+    <title>Cursor Clicker v2.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Rubik:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -14,17 +14,13 @@
 
     <div id="auth-overlay">
         <div class="panel auth-box">
-            <h1>CURSOR <span class="highlight">CLICKER</span> v2</h1>
-            <p>Faça login para salvar na nuvem e ver o Rank</p>
-            
-            <input type="email" id="email" placeholder="Seu E-mail">
-            <input type="password" id="password" placeholder="Sua Senha">
-
+            <h1>CURSOR <span class="highlight">CLICKER</span></h1>
+            <input type="email" id="email" placeholder="E-mail">
+            <input type="password" id="password" placeholder="Senha">
             <div class="auth-btns">
                 <button onclick="window.tryLogin()" class="btn-main">ENTRAR</button>
                 <button onclick="window.tryRegister()" class="btn-sec">CRIAR CONTA</button>
             </div>
-            
             <button onclick="window.startOffline()" class="btn-guest">Jogar Offline</button>
         </div>
     </div>
@@ -32,47 +28,39 @@
     <div id="leaderboard-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>🏆 TOP 10 JOGADORES</h2>
+                <h2>🏆 RANKING GLOBAL</h2>
                 <button onclick="toggleLeaderboard()" class="close-btn">&times;</button>
             </div>
-            <div id="leaderboard-list">
-                <p>Carregando...</p>
-            </div>
+            <div id="leaderboard-list">Carregando...</div>
         </div>
     </div>
 
     <div id="game-app" class="hidden">
         
         <section class="click-zone">
-            <div class="top-bar">
-                <div class="user-tag">
-                    <i class="fas fa-user-astronaut"></i> <span id="player-name">Visitante</span>
+            <div class="top-nav">
+                <div class="user-info">
+                    <i class="fas fa-user"></i> <span id="player-name">...</span>
                 </div>
-                <div class="actions">
-                    <button onclick="toggleLeaderboard()" title="Ranking"><i class="fas fa-trophy"></i></button>
-                    <button onclick="window.manualSave()" title="Salvar"><i class="fas fa-save"></i></button>
-                    <button onclick="window.doLogout()" title="Sair"><i class="fas fa-sign-out-alt"></i></button>
+                <div class="nav-actions">
+                    <button onclick="toggleLeaderboard()"><i class="fas fa-trophy"></i></button>
+                    <button onclick="window.manualSave()"><i class="fas fa-save"></i></button>
+                    <button onclick="window.doLogout()"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
             </div>
 
-            <div class="score-display">
-                <div id="score">0</div>
-                <div class="label">Diamantes</div>
-                <div id="cps" class="cps">0.0 por segundo</div>
+            <div class="stats-container">
+                <h2 id="score">0</h2>
+                <p>Diamantes</p>
+                <small id="cps">0.0 por segundo</small>
             </div>
 
             <div id="click-pad">
-                <div id="main-cursor" class="fas fa-mouse-pointer"></div>
-                <div class="pulse-ring"></div>
+                <i id="main-cursor" class="fas fa-mouse-pointer"></i>
             </div>
 
-            <div class="cursor-stats">
-                Cor: <span id="color-name" style="color:var(--cursor-color)">Padrão</span> (Nv. <span id="cursor-lvl">1</span>)
-            </div>
-            
-            <div class="pc-hints">
-                <span>[Espaço] Clicar</span>
-                <span>[Ctrl+S] Salvar</span>
+            <div class="evolution-info">
+                COR: <span id="color-name">Padrão</span> (Nv. <span id="cursor-lvl">1</span>)
             </div>
         </section>
 
@@ -80,7 +68,7 @@
             <div class="shop-header">
                 <h3><i class="fas fa-shopping-cart"></i> LOJA DE EVOLUÇÃO</h3>
             </div>
-            <div id="shop-list" class="shop-content">
+            <div id="shop-list">
                 </div>
         </section>
     </div>
