@@ -1,102 +1,81 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, collection, query, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+// cdn.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// --- CONFIGURE SUA API AQUI ---
 const firebaseConfig = {
     apiKey: "AIzaSyAH1oVGTvxKj6HHnsyuHqcikabx_Oq_Bpg",
-    authDomain:"cursor-clicker.firebaseapp.com",
+    authDomain: "cursor-clicker.firebaseapp.com",
     projectId: "cursor-clicker",
     storageBucket: "cursor-clicker.firebasestorage.app",
     messagingSenderId: "820736183584",
     appId: "1:820736183584:web:75ecad687c02469b8b5b45",
     measurementId: "G-YQE2S8FVRF"
-  };
+};
 
-let app, auth, db;
-let isOfflineMode = false;
+// Inicializa
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
 let currentUser = null;
 
-// Inicializa com tratamento de erro
-try {
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app);
-    db = getFirestore(app);
-    document.getElementById('system-status').innerText = "🟢 Sistema Online";
-    document.getElementById('system-status').style.color = "#00ff88";
-} catch (e) {
-    console.warn("API Offline. Ativando modo local.", e);
-    isOfflineMode = true;
-    document.getElementById('system-status').innerText = "🟠 Modo Local (API Falhou)";
-    document.getElementById('system-status').style.color = "orange";
-}
-
-// --- FUNÇÕES EXPORTADAS ---
-
-export async function loginUser(email, password) {
-    if (isOfflineMode) throw new Error("API Indisponível. Use Modo Offline.");
-    const cred = await signInWithEmailAndPassword(auth, email, password);
+// Autenticação
+export async function loginUser(email, pass) {
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
     currentUser = cred.user;
     return currentUser;
 }
 
-export async function registerUser(email, password) {
-    if (isOfflineMode) throw new Error("API Indisponível. Use Modo Offline.");
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
+export async function registerUser(email, pass) {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
     currentUser = cred.user;
+    // Cria doc inicial no leaderboard
+    await saveGameData({ diamonds: 0, inventory: [] }, true); 
     return currentUser;
 }
 
 export function logoutUser() {
-    if (auth) signOut(auth);
-    location.reload();
+    signOut(auth).then(() => location.reload());
 }
 
-export async function saveGameData(data) {
-    if (isOfflineMode || !currentUser) {
-        localStorage.setItem('cc_save_v2', JSON.stringify(data));
-    } else {
+// Salvar
+export async function saveGameData(data, forceCloud = false) {
+    // Salva local sempre
+    localStorage.setItem('cc_v2_save', JSON.stringify(data));
+    
+    // Salva nuvem se logado
+    if (auth.currentUser) {
         try {
-            await setDoc(doc(db, "players", currentUser.uid), {
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            await setDoc(userRef, {
                 ...data,
-                name: currentUser.email.split('@')[0],
-                lastSeen: serverTimestamp()
+                email: auth.currentUser.email,
+                lastSeen: new Date()
             }, { merge: true });
-        } catch (e) {
-            localStorage.setItem('cc_save_v2', JSON.stringify(data)); // Fallback
-        }
+        } catch (e) { console.error("Erro save cloud", e); }
     }
 }
 
+// Carregar
 export async function loadGameData() {
-    if (isOfflineMode || !currentUser) {
-        return JSON.parse(localStorage.getItem('cc_save_v2'));
-    } else {
-        try {
-            const snap = await getDoc(doc(db, "players", currentUser.uid));
-            return snap.exists() ? snap.data() : null;
-        } catch (e) {
-            return JSON.parse(localStorage.getItem('cc_save_v2'));
-        }
+    if (auth.currentUser) {
+        const snap = await getDoc(doc(db, "users", auth.currentUser.uid));
+        if (snap.exists()) return snap.data();
+    }
+    return JSON.parse(localStorage.getItem('cc_v2_save'));
+}
+
+// Leaderboard
+export async function getLeaderboard() {
+    try {
+        const q = query(collection(db, "users"), orderBy("diamonds", "desc"), limit(10));
+        const snap = await getDocs(q);
+        return snap.docs.map(d => d.data());
+    } catch (e) {
+        console.error(e);
+        return [];
     }
 }
 
-// Listener de Leaderboard em Tempo Real
-export function subscribeToRank(callback) {
-    if (isOfflineMode || !db) return;
-    const q = query(collection(db, "players"), orderBy("diamonds", "desc"), limit(10));
-    onSnapshot(q, (snap) => {
-        const data = snap.docs.map((d, i) => ({ ...d.data(), rank: i+1, id: d.id }));
-        callback(data);
-    });
-}
-
-// Auto-Login Check
-if (auth) {
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            currentUser = user;
-            window.dispatchEvent(new CustomEvent('auth-success', { detail: user }));
-        }
-    });
-}
+export { auth };
