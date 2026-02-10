@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cursor Clicker 2.0</title>
+    <title>Cursor Clicker Evo 2.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -17,9 +17,8 @@
             <div class="badges">
                 <span class="badge green">v2.0</span>
                 <span class="badge orange">Firebase Ready</span>
-                <span class="badge blue">Production</span>
+                <span class="badge blue">Stable</span>
             </div>
-
             <h1 class="glitch-text">CURSOR <span class="neon-text">EVO</span></h1>
             
             <div class="input-group">
@@ -33,31 +32,31 @@
 
             <div class="auth-buttons">
                 <button onclick="window.tryLogin()" class="btn-primary">CONECTAR</button>
-                <button onclick="window.tryRegister()" class="btn-secondary">CRIAR CONTA</button>
+                <button onclick="window.tryRegister()" class="btn-secondary">NOVO USUÁRIO</button>
             </div>
             
             <button onclick="window.startGuestMode()" class="btn-guest">
-                <i class="fas fa-user-secret"></i> MODO OFFLINE (VISITANTE)
+                <i class="fas fa-user-secret"></i> ENTRAR COMO VISITANTE
             </button>
             
-            <p id="system-status" class="status-text">Inicializando...</p>
+            <p id="system-status" class="status-text">Iniciando sistemas...</p>
         </div>
     </div>
 
     <div id="game-app" class="hidden">
         <header class="hud-header">
             <div class="player-info">
-                <span id="p-mode" class="rank-badge">--</span>
+                <span id="p-mode" class="rank-badge">MODO</span>
                 <span id="p-name">Jogador</span>
             </div>
-            <button onclick="window.doLogout()" class="btn-icon" title="Sair"><i class="fas fa-sign-out-alt"></i></button>
+            <button onclick="window.doLogout()" class="btn-icon"><i class="fas fa-sign-out-alt"></i></button>
         </header>
 
         <main class="game-grid">
             <section class="zone-click">
                 <div class="stats-container">
                     <div id="diamonds-val">0</div>
-                    <div class="label" style="color: var(--dynamic-color)">DIAMANTES</div>
+                    <div class="label">DIAMANTES</div>
                     <div id="cps-val" class="sub-stat">0.0 / seg</div>
                 </div>
 
@@ -68,14 +67,14 @@
                 </div>
                 
                 <div class="level-indicator">
-                    COR: <span id="current-color-name">Padrão</span> (Nv. <span id="cursor-lvl">0</span>)
+                    RANK VISUAL: <span id="current-color-name">Padrão</span> (Nível <span id="cursor-lvl">0</span>)
                 </div>
             </section>
 
             <section class="zone-manage">
                 <div class="tabs">
                     <button class="tab-btn active" onclick="window.switchTab('store')"><i class="fas fa-shopping-cart"></i> Loja</button>
-                    <button class="tab-btn" onclick="window.switchTab('rank')"><i class="fas fa-trophy"></i> Rank</button>
+                    <button class="tab-btn" onclick="window.switchTab('rank')"><i class="fas fa-trophy"></i> Global</button>
                 </div>
                 
                 <div id="tab-store" class="tab-content active">
@@ -84,9 +83,7 @@
                 
                 <div id="tab-rank" class="tab-content hidden">
                     <ul id="leaderboard">
-                        <li style="padding:20px; text-align:center; color:#666;">
-                            <i class="fas fa-satellite-dish"></i><br>Conectando ao satélite...
-                        </li>
+                        <li style="padding:20px; text-align:center; color:#666;">Ranking disponível apenas online.</li>
                     </ul>
                 </div>
             </section>
@@ -94,10 +91,11 @@
     </div>
 
     <div id="shortcuts-panel">
-        <h3>⌨️ Comandos</h3>
+        <h3>⌨️ Teclado</h3>
         <ul>
             <li><span class="key">Espaço</span> Clicar</li>
-            <li><span class="key">Ctrl</span>+<span class="key">S</span> Salvar</li>
+            <li><span class="key">Ctrl+S</span> Salvar</li>
+            <li><span class="key">ESC</span> Sair</li>
         </ul>
     </div>
 
