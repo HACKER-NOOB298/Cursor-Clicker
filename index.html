@@ -1,20 +1,12 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cursor Clicker Ultimate</title>
-    
+    <title>Cursor Clicker V2</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-
-    <script>
-        window.onerror = function(msg, url, line) {
-            alert("ERRO CRÍTICO NO JOGO:\n" + msg + "\nLinha: " + line);
-            return false;
-        };
-    </script>
 </head>
 <body>
 
@@ -23,11 +15,11 @@
     <div id="auth-screen" class="overlay-screen">
         <div class="auth-box">
             <h1>CURSOR<span>V5</span></h1>
-            <p>Ultimate Clicker Experience</p>
+            <p id="auth-msg" class="error-text" style="display:none"></p>
             
             <div class="input-group">
                 <i class="fas fa-envelope"></i>
-                <input type="email" id="auth-email" placeholder="Email">
+                <input type="email" id="auth-email" placeholder="E-mail">
             </div>
             <div class="input-group">
                 <i class="fas fa-lock"></i>
@@ -36,105 +28,104 @@
 
             <div class="auth-buttons">
                 <button id="btn-login" class="btn-primary">ENTRAR</button>
-                <button id="btn-register" class="btn-secondary">CRIAR CONTA</button>
+                <button id="btn-register" class="btn-secondary">REGISTAR</button>
             </div>
-            <button id="btn-anon" class="btn-text">Jogar Offline (Visitante)</button>
+            <button id="btn-forgot" class="btn-text">Esqueci-me da senha</button>
+            <button id="btn-anon" class="btn-text">Jogar como Visitante</button>
         </div>
     </div>
 
-    <div id="settings-modal" class="modal hidden">
+    <div id="reset-modal" class="modal hidden">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>Ajustes</h2>
-                <button id="btn-close-settings" class="close-btn">&times;</button>
+            <h3>Recuperar Conta</h3>
+            <p>Insira o e-mail para receber o link de redefinição.</p>
+            <input type="email" id="reset-email-input" class="full-input" placeholder="E-mail de recuperação">
+            <div class="auth-buttons">
+                <button id="btn-confirm-reset" class="btn-primary">Enviar Link</button>
+                <button id="btn-cancel-reset" class="btn-secondary">Cancelar</button>
             </div>
-            <div class="modal-body">
-                <div class="setting-row">
-                    <label>Sons</label>
-                    <button id="btn-toggle-sound">ON</button>
-                </div>
-                <div class="setting-row">
-                    <label>Tamanho do Mouse</label>
-                    <input type="range" id="cursor-size-slider" min="100" max="250" value="140">
-                </div>
-                <hr>
-                <button id="btn-logout" class="btn-danger">Sair da Conta</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="rank-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Top Jogadores</h2>
-                <button id="btn-close-rank" class="close-btn">&times;</button>
-            </div>
-            <div id="rank-list" class="rank-list">Carregando...</div>
-            <button id="btn-refresh-rank" class="btn-primary full">Atualizar</button>
         </div>
     </div>
 
     <main id="app" class="hidden">
         
         <aside class="sidebar-left">
-            <div class="logo-area"><i class="fas fa-mouse"></i> CC<span>PRO</span></div>
-            
+            <div class="logo-area">CC<span>ULTIMATE</span></div>
             <div class="player-profile">
-                <div class="avatar"><i class="fas fa-user-astronaut"></i></div>
+                <div class="avatar"><i class="fas fa-robot"></i></div>
                 <div class="info">
-                    <span id="player-email">Visitante</span>
-                    <small>Nível <span id="player-lvl">1</span></small>
+                    <span id="player-name">...</span>
+                    <small id="player-lvl">Nível 1</small>
                 </div>
             </div>
-
             <nav class="main-menu">
-                <button id="btn-open-rank"><i class="fas fa-trophy"></i> Rank</button>
-                <button id="btn-open-settings"><i class="fas fa-cog"></i> Opções</button>
-                <button id="btn-save"><i class="fas fa-save"></i> Salvar</button>
+                <button id="nav-rank"><i class="fas fa-trophy"></i> Ranking</button>
+                <button id="nav-settings"><i class="fas fa-cog"></i> Ajustes</button>
+                <button id="nav-save"><i class="fas fa-cloud"></i> Salvar Jogo</button>
+                <button id="nav-logout" class="danger"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </nav>
-
             <div class="chroma-status">
-                <div id="chroma-preview" class="color-dot"></div>
+                <div id="chroma-dot" class="dot"></div>
                 <span>Cor: <b id="chroma-name">Padrão</b></span>
             </div>
         </aside>
 
         <section class="game-stage">
-            <div class="stats-hud">
+            <div class="hud">
                 <div class="hud-item">
                     <small>DIAMANTES</small>
-                    <span id="score-display">0</span>
+                    <h2 id="diamond-display">0</h2>
                 </div>
                 <div class="hud-item">
-                    <small>POR SEGUNDO</small>
-                    <span id="cps-display">0.0</span>
+                    <small>CPS</small>
+                    <p id="cps-display">0.0</p>
                 </div>
             </div>
 
-            <div class="click-zone">
-                <div id="click-trigger" class="click-trigger">
-                    <i class="fas fa-mouse-pointer" id="visual-cursor"></i>
+            <div class="click-container">
+                <div id="main-clicker" class="hitbox">
+                    <i class="fas fa-mouse-pointer" id="cursor-icon"></i>
                 </div>
             </div>
         </section>
 
         <aside class="sidebar-right">
-            <div class="tabs-header">
-                <button id="tab-shop-btn" class="tab-link active">LOJA</button>
-                <button id="tab-achieve-btn" class="tab-link">TROFÉUS</button>
+            <div class="tabs">
+                <button id="tab-shop" class="active">LOJA</button>
+                <button id="tab-achieve">CONQUISTAS</button>
             </div>
-
-            <div id="tab-shop" class="tab-content active">
-                <div id="upgrades-list"></div>
+            <div id="shop-panel" class="tab-content active">
+                <div id="upgrades-list">
+                    </div>
             </div>
-
-            <div id="tab-achievements" class="tab-content">
-                <div class="progress-bar"><div id="achieve-progress"></div></div>
-                <div id="achievements-list"></div>
+            <div id="achieve-panel" class="tab-content">
+                <div id="achieve-list"></div>
             </div>
         </aside>
-
     </main>
+
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Configurações</h2>
+            <div class="setting-row">
+                <label>Sons</label>
+                <button id="toggle-sound" class="toggle">ON</button>
+            </div>
+            <div class="setting-row">
+                <label>Tamanho do Cursor</label>
+                <input type="range" id="range-cursor" min="80" max="250" value="140">
+            </div>
+            <button class="btn-close" onclick="closeModals()">Fechar</button>
+        </div>
+    </div>
+
+    <div id="rank-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Top 10 Mundial</h2>
+            <div id="leaderboard-data"></div>
+            <button class="btn-close" onclick="closeModals()">Fechar</button>
+        </div>
+    </div>
 
     <script type="module" src="cdn.js"></script>
     <script type="module" src="script.js"></script>
