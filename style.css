@@ -151,3 +151,91 @@ body {
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+/* --- ATUALIZAÇÃO DA BARRA LATERAL --- */
+
+.sidebar {
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    /* Isso garante que o topo fique no topo e o fundo no fundo */
+    justify-content: flex-start; 
+}
+
+/* Perfil com menos margem para subir os botões */
+.profile-box {
+    text-align: center;
+    margin-bottom: 1.5rem; /* Reduzi a margem */
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    margin-top: 20px; /* Espaço para o botão fechar no mobile */
+}
+
+/* O menu ocupa o espaço disponível, empurrando o resto pra baixo, mas ficando no topo */
+.menu {
+    flex: 1; 
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Espaço entre botões do menu */
+}
+
+.menu button {
+    padding: 0.8rem; /* Botões mais compactos */
+}
+
+/* Área inferior fixa */
+.bottom-actions {
+    margin-top: auto; /* Empurra para o final da barra */
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Estilo do botão Sair e Salvar */
+.btn.small {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.save-status {
+    text-align: center;
+    margin-bottom: 5px;
+}
+.save-status small {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+/* --- BOTÃO FECHAR NO MOBILE --- */
+.close-mob-btn {
+    display: none; /* Escondido no PC */
+}
+
+@media (max-width: 900px) {
+    .close-mob-btn {
+        display: block;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: transparent;
+        border: 1px solid var(--danger);
+        color: var(--danger);
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        cursor: pointer;
+        z-index: 10;
+    }
+    
+    .profile-box {
+        margin-top: 30px; /* Mais espaço no mobile pra não bater no X */
+    }
+}
+
