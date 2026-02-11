@@ -41,3 +41,8 @@ build/
 *.bak
 *.backup
 *~
+
+.DS_Store
+node_modules/
+.firebase/
+*.log
