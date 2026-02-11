@@ -1,15 +1,13 @@
-// --- IMPORTAÇÕES DO FIREBASE (VERSÃO WEB MODULAR) ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { 
     getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, 
-    signOut, onAuthStateChanged, signInAnonymously 
+    signOut, onAuthStateChanged, signInAnonymously, sendPasswordResetEmail 
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 import { 
     getFirestore, doc, setDoc, getDoc, 
     collection, query, orderBy, limit, getDocs 
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-// --- CONFIGURAÇÃO (SUA API KEY) ---
 const firebaseConfig = {
     apiKey: "AIzaSyAH1oVGTvxKj6HHnsyuHqcikabx_Oq_Bpg",
     authDomain: "cursor-clicker.firebaseapp.com",
@@ -20,102 +18,70 @@ const firebaseConfig = {
     measurementId: "G-YQE2S8FVRF"
 };
 
-// INICIALIZAÇÃO
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// --- FUNÇÕES DE AUTENTICAÇÃO ---
-export async function registerUser(email, password) {
-    try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        return { success: true, user: userCredential.user };
-    } catch (error) {
-        return { success: false, error: error.message };
+// Tradução de erros do Firebase para o utilizador
+function translateError(code) {
+    switch (code) {
+        case 'auth/invalid-email': return 'E-mail inválido.';
+        case 'auth/user-not-found': return 'Utilizador não encontrado.';
+        case 'auth/wrong-password': return 'Senha incorreta.';
+        case 'auth/email-already-in-use': return 'Este e-mail já está em uso.';
+        case 'auth/weak-password': return 'A senha deve ter pelo menos 6 caracteres.';
+        default: return 'Ocorreu um erro. Tente novamente.';
     }
 }
 
 export async function loginUser(email, password) {
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        return { success: true, user: userCredential.user };
-    } catch (error) {
-        return { success: false, error: error.message };
-    }
-}
-
-export async function loginAnonymous() {
-    try {
-        const result = await signInAnonymously(auth);
-        return { success: true, user: result.user };
-    } catch (error) {
-        return { success: false, error: error.message };
-    }
-}
-
-export async function logoutUser() {
-    try {
-        await signOut(auth);
-        window.location.reload();
-    } catch (error) {
-        console.error("Erro ao sair", error);
-    }
-}
-
-// --- BANCO DE DADOS (FIRESTORE) ---
-export async function saveGameData(gameState) {
-    if (!auth.currentUser) return; // Não salva se não estiver logado
-    const userRef = doc(db, "players", auth.currentUser.uid);
-    
-    // Prepara objeto para salvar (removemos dados sensíveis ou funções)
-    const dataToSave = {
-        email: auth.currentUser.email || "Anônimo",
-        diamonds: gameState.diamonds || 0,
-        inventory: gameState.inventory || [],
-        achievements: gameState.achievements || [],
-        settings: gameState.settings || {},
-        lastSave: Date.now()
-    };
-
-    try {
-        await setDoc(userRef, dataToSave, { merge: true });
-        console.log("Jogo salvo na nuvem.");
+        const res = await signInWithEmailAndPassword(auth, email, password);
+        return { success: true, user: res.user };
     } catch (e) {
-        console.error("Erro ao salvar:", e);
+        return { success: false, error: translateError(e.code) };
     }
+}
+
+export async function registerUser(email, password) {
+    try {
+        const res = await createUserWithEmailAndPassword(auth, email, password);
+        return { success: true, user: res.user };
+    } catch (e) {
+        return { success: false, error: translateError(e.code) };
+    }
+}
+
+export async function resetPassword(email) {
+    try {
+        await sendPasswordResetEmail(auth, email);
+        return { success: true };
+    } catch (e) {
+        return { success: false, error: translateError(e.code) };
+    }
+}
+
+export async function saveGameData(data) {
+    if (!auth.currentUser) return;
+    try {
+        await setDoc(doc(db, "players", auth.currentUser.uid), {
+            ...data,
+            lastUpdate: Date.now(),
+            email: auth.currentUser.email || "Anónimo"
+        }, { merge: true });
+    } catch (e) { console.error("Erro ao salvar:", e); }
 }
 
 export async function loadGameData() {
     if (!auth.currentUser) return null;
-    const userRef = doc(db, "players", auth.currentUser.uid);
-    try {
-        const docSnap = await getDoc(userRef);
-        if (docSnap.exists()) {
-            return docSnap.data();
-        }
-    } catch (e) {
-        console.error("Erro ao carregar:", e);
-    }
-    return null;
+    const snap = await getDoc(doc(db, "players", auth.currentUser.uid));
+    return snap.exists() ? snap.data() : null;
 }
 
-// --- LEADERBOARD (RANKING) ---
 export async function getLeaderboard() {
-    const playersRef = collection(db, "players");
-    const q = query(playersRef, orderBy("diamonds", "desc"), limit(10));
-    
-    try {
-        const querySnapshot = await getDocs(q);
-        let leaderboard = [];
-        querySnapshot.forEach((doc) => {
-            leaderboard.push(doc.data());
-        });
-        return leaderboard;
-    } catch (e) {
-        console.error("Erro ao buscar rank:", e);
-        return [];
-    }
+    const q = query(collection(db, "players"), orderBy("diamonds", "desc"), limit(10));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => d.data());
 }
 
-// Exportar Auth para checagem de estado no script principal
-export { auth };
+export { auth, loginAnonymous, signOut };
