@@ -1,135 +1,149 @@
 <!DOCTYPE html>
-<html lang="pt-pt">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cursor Clicker V2</title>
+    <title>Cursor Clicker v2.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="toast-container"></div>
+    <div id="toast-area"></div>
 
-    <div id="auth-screen" class="overlay-screen">
-        <div class="auth-box">
-            <h1>CURSOR<span>V5</span></h1>
-            <p id="auth-msg" class="error-text" style="display:none"></p>
+    <div id="auth-screen" class="overlay-full">
+        <div class="card auth-card">
+            <h1 class="game-title">CURSOR <span>CLICKER v2</span></h1>
+            <p class="subtitle">Faça login para salvar na nuvem e competir.</p>
             
+            <p id="auth-error" class="error-msg" style="display:none"></p>
+
             <div class="input-group">
                 <i class="fas fa-envelope"></i>
-                <input type="email" id="auth-email" placeholder="E-mail">
+                <input type="email" id="inp-email" placeholder="E-mail">
             </div>
             <div class="input-group">
                 <i class="fas fa-lock"></i>
-                <input type="password" id="auth-pass" placeholder="Senha">
+                <input type="password" id="inp-pass" placeholder="Senha">
             </div>
 
-            <div id="auth-screen" class="overlay-screen">
-    <h1>CURSOR<span>V5</span></h1>
-    <button id="btn-login">ENTRAR</button>
-    <button id="btn-register">REGISTAR</button>
-</div>
-
-<main id="app" class="hidden">
-    </main>
-</div>
-</div>
-
-    <div id="reset-modal" class="modal hidden">
-        <div class="modal-content">
-            <h3>Recuperar Conta</h3>
-            <p>Insira o e-mail para receber o link de redefinição.</p>
-            <input type="email" id="reset-email-input" class="full-input" placeholder="E-mail de recuperação">
-            <div class="auth-buttons">
-                <button id="btn-confirm-reset" class="btn-primary">Enviar Link</button>
-                <button id="btn-cancel-reset" class="btn-secondary">Cancelar</button>
+            <div class="row-btn">
+                <button id="btn-login" class="btn primary">ENTRAR</button>
+                <button id="btn-register" class="btn secondary">CRIAR CONTA</button>
+            </div>
+            
+            <div class="extra-opts">
+                <button id="btn-anon" class="link-btn">Jogar sem conta</button>
+                <button id="btn-forgot" class="link-btn">Esqueci a senha</button>
             </div>
         </div>
     </div>
 
-    <main id="app" class="hidden">
+    <main id="app-screen" class="app-layout hidden">
         
-        <aside class="sidebar-left">
-            <div class="logo-area">CC<span>ULTIMATE</span></div>
-            <div class="player-profile">
-                <div class="avatar"><i class="fas fa-robot"></i></div>
-                <div class="info">
-                    <span id="player-name">...</span>
-                    <small id="player-lvl">Nível 1</small>
+        <aside class="sidebar left-panel">
+            <div class="profile-box">
+                <div class="avatar"><i class="fas fa-user-astronaut"></i></div>
+                <div class="user-info">
+                    <span id="display-name">Carregando...</span>
+                    <small id="device-type">Detectando...</small>
                 </div>
             </div>
-            <nav class="main-menu">
-                <button id="nav-rank"><i class="fas fa-trophy"></i> Ranking</button>
-                <button id="nav-settings"><i class="fas fa-cog"></i> Ajustes</button>
-                <button id="nav-save"><i class="fas fa-cloud"></i> Salvar Jogo</button>
-                <button id="nav-logout" class="danger"><i class="fas fa-sign-out-alt"></i> Sair</button>
+
+            <nav class="menu">
+                <button id="nav-rank"><i class="fas fa-trophy"></i> Leaderboard</button>
+                <button id="nav-achieve"><i class="fas fa-medal"></i> Conquistas</button>
+                <button id="nav-settings"><i class="fas fa-cog"></i> Configurações</button>
             </nav>
-            <div class="chroma-status">
-                <div id="chroma-dot" class="dot"></div>
-                <span>Cor: <b id="chroma-name">Padrão</b></span>
+
+            <div class="save-status">
+                <button id="btn-cloud-save" class="btn small"><i class="fas fa-cloud-upload-alt"></i> Salvar Agora</button>
+                <small id="last-save-msg">Não salvo.</small>
             </div>
         </aside>
 
-        <section class="game-stage">
-            <div class="hud">
-                <div class="hud-item">
+        <section class="game-center">
+            <div class="scoreboard">
+                <div class="score-item">
                     <small>DIAMANTES</small>
-                    <h2 id="diamond-display">0</h2>
+                    <span id="score-val">0</span>
                 </div>
-                <div class="hud-item">
-                    <small>CPS</small>
-                    <p id="cps-display">0.0</p>
+                <div class="score-item">
+                    <small>POR SEGUNDO</small>
+                    <span id="cps-val">0.0</span>
                 </div>
             </div>
 
-            <div class="click-container">
-                <div id="main-clicker" class="hitbox">
-                    <i class="fas fa-mouse-pointer" id="cursor-icon"></i>
-                </div>
+            <div id="click-zone" class="clicker-area">
+                <i id="main-cursor" class="fas fa-mouse-pointer"></i>
+                <div id="click-particles"></div>
+            </div>
+
+            <div class="mobile-controls">
+                <button id="mob-menu-btn"><i class="fas fa-bars"></i> Menu</button>
+                <button id="mob-shop-btn"><i class="fas fa-shopping-cart"></i> Loja</button>
             </div>
         </section>
 
-        <aside class="sidebar-right">
-            <div class="tabs">
-                <button id="tab-shop" class="active">LOJA</button>
-                <button id="tab-achieve">CONQUISTAS</button>
+        <aside class="sidebar right-panel" id="shop-panel">
+            <div class="panel-header">
+                <h3>LOJA DE EVOLUÇÃO</h3>
+                <small>15 Upgrades Disponíveis</small>
+                <button id="close-shop-mob" class="close-mob"><i class="fas fa-times"></i></button>
             </div>
-            <div id="shop-panel" class="tab-content active">
-                <div id="upgrades-list">
-                    </div>
-            </div>
-            <div id="achieve-panel" class="tab-content">
-                <div id="achieve-list"></div>
-            </div>
+            <div id="shop-list" class="scroll-content">
+                </div>
         </aside>
     </main>
 
-    <div id="settings-modal" class="modal hidden">
+    <div id="modal-settings" class="modal hidden">
         <div class="modal-content">
             <h2>Configurações</h2>
             <div class="setting-row">
-                <label>Sons</label>
-                <button id="toggle-sound" class="toggle">ON</button>
+                <label>Efeitos Sonoros</label>
+                <button id="toggle-sound" class="toggle-btn on">ON</button>
             </div>
             <div class="setting-row">
                 <label>Tamanho do Cursor</label>
-                <input type="range" id="range-cursor" min="80" max="250" value="140">
+                <input type="range" id="range-size" min="50" max="200" value="120">
             </div>
-            <button class="btn-close" onclick="closeModals()">Fechar</button>
+            <div class="info-block">
+                <h4>Atalhos (PC)</h4>
+                <p><code>Espaço</code> Clicar</p>
+                <p><code>Ctrl+S</code> Salvar</p>
+                <p><code>ESC</code> Fechar Janelas</p>
+            </div>
+            <button class="btn danger" id="btn-logout">Sair da Conta</button>
+            <button class="btn secondary close-modal">Fechar</button>
         </div>
     </div>
 
-    <div id="rank-modal" class="modal hidden">
+    <div id="modal-rank" class="modal hidden">
         <div class="modal-content">
-            <h2>Top 10 Mundial</h2>
-            <div id="leaderboard-data"></div>
-            <button class="btn-close" onclick="closeModals()">Fechar</button>
+            <h2>🏆 Top Jogadores</h2>
+            <div id="leaderboard-list">Carregando...</div>
+            <button class="btn secondary close-modal">Fechar</button>
         </div>
     </div>
 
-    <script type="module" src="cdn.js"></script>
+    <div id="modal-achieve" class="modal hidden">
+        <div class="modal-content">
+            <h2>🏅 Conquistas</h2>
+            <div id="achieve-list" class="achieve-grid"></div>
+            <button class="btn secondary close-modal">Fechar</button>
+        </div>
+    </div>
+
+    <div id="modal-reset" class="modal hidden">
+        <div class="modal-content">
+            <h3>Recuperar Senha</h3>
+            <input type="email" id="reset-email-input" placeholder="Seu e-mail">
+            <button id="btn-confirm-reset" class="btn primary">Enviar</button>
+            <button class="btn secondary close-modal">Cancelar</button>
+        </div>
+    </div>
+
     <script type="module" src="script.js"></script>
 </body>
 </html>
