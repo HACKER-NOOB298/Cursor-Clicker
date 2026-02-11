@@ -3,126 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cursor Clicker Elite - Chroma Edition</title>
+    <title>Cursor Clicker Ultimate</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="loader" class="loader-wrapper">
-        <div class="spinner"></div>
-        <p>Sincronizando com a Nuvem...</p>
-    </div>
+    <div id="toast-container"></div>
 
-    <main id="app-container" class="hidden">
-        
-        <aside class="stats-sidebar">
-            <div class="brand">
-                <h1>CURSOR<span>PRO</span></h1>
-                <small>v3.0.4 - Chroma</small>
+    <div id="app">
+        <aside class="sidebar-left">
+            <div class="logo">
+                <i class="fas fa-mouse"></i> CLICKER<span>PRO</span>
             </div>
-
-            <div class="player-card">
-                <div class="avatar" id="player-avatar">
-                    <i class="fas fa-user-astronaut"></i>
-                </div>
-                <div class="info">
-                    <h2 id="username-display">Explorador</h2>
-                    <p id="rank-title">Iniciante</p>
+            
+            <div class="user-card">
+                <div class="avatar"><i class="fas fa-user-astronaut"></i></div>
+                <div class="user-info">
+                    <span id="player-name">Visitante</span>
+                    <small id="rank-name">Iniciante</small>
                 </div>
             </div>
 
-            <nav class="side-nav">
-                <button class="nav-item active" onclick="switchTab('upgrades')">
-                    <i class="fas fa-arrow-up-right-dots"></i> Loja
-                </button>
-                <button class="nav-item" onclick="switchTab('achievements')">
-                    <i class="fas fa-award"></i> Conquistas
-                </button>
-                <button class="nav-item" onclick="switchTab('stats')">
-                    <i class="fas fa-chart-line"></i> Dados
-                </button>
-                <button class="nav-item" onclick="toggleSettings()">
-                    <i class="fas fa-cog"></i> Ajustes
-                </button>
+            <nav class="menu">
+                <button onclick="window.saveGame()"><i class="fas fa-save"></i> Salvar Jogo</button>
+                <button onclick="window.toggleSound()" id="btn-sound"><i class="fas fa-volume-up"></i> Som: ON</button>
+                <button onclick="window.hardReset()" class="danger"><i class="fas fa-trash"></i> Resetar</button>
             </nav>
 
-            <div class="prestige-area">
-                <div class="prestige-bar">
-                    <div id="prestige-progress" class="bar-fill"></div>
-                </div>
-                <button id="ascend-btn" disabled onclick="prestige()">ASCENDER (Bônus: 0%)</button>
+            <div class="chroma-info">
+                <div class="color-dot" id="chroma-dot"></div>
+                <p>Tema: <span id="chroma-name">Padrão</span></p>
+                <small>Nível do Cursor: <span id="cursor-lvl">1</span></small>
             </div>
         </aside>
 
-        <section class="game-core">
-            <div class="floating-notifs" id="notif-container"></div>
-            
-            <header class="main-stats">
-                <div class="stat-box">
-                    <label>DIAMANTES ATUAIS</label>
-                    <div class="value-row">
-                        <i class="fas fa-gem gem-icon"></i>
-                        <span id="main-score">0</span>
-                    </div>
+        <section class="game-center">
+            <div class="stats-header">
+                <div class="stat-item">
+                    <small>DIAMANTES</small>
+                    <span id="score">0</span>
                 </div>
-                <div class="stat-box">
-                    <label>PRODUÇÃO PASSIVA</label>
-                    <div class="value-row">
-                        <span id="main-cps">0.0</span>
-                        <small>/seg</small>
-                    </div>
+                <div class="stat-item">
+                    <small>POR SEGUNDO</small>
+                    <span id="cps">0.0</span>
                 </div>
-            </header>
+            </div>
 
-            <div class="click-engine">
-                <div id="click-effect-area"></div>
-                <button id="main-target" class="cursor-button">
-                    <i class="fas fa-mouse-pointer" id="cursor-icon"></i>
+            <div class="click-area">
+                <div class="ripple-container" id="ripples"></div>
+                <button id="big-cookie">
+                    <i class="fas fa-mouse-pointer" id="main-cursor"></i>
                 </button>
-                <div class="pulse-aura"></div>
             </div>
-
-            <footer class="chroma-status">
-                <div class="color-indicator">
-                    <div id="current-color-dot" class="dot"></div>
-                    <span id="current-color-name">Padrão Cyber</span>
-                </div>
-                <div class="version-tag">NÍVEL DO CURSOR: <span id="cursor-lvl-val">1</span></div>
-            </footer>
         </section>
 
-        <section class="shop-panel" id="shop-panel">
-            <div class="panel-tabs">
-                <button class="tab-btn active">EVOLUÇÕES</button>
-                <button class="tab-btn">ESPECIAIS</button>
+        <aside class="sidebar-right">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('shop')"><i class="fas fa-shopping-cart"></i> Loja</button>
+                <button class="tab-btn" onclick="switchTab('achievements')"><i class="fas fa-trophy"></i> Conquistas</button>
             </div>
-            <div class="items-container" id="upgrade-list">
-                </div>
-        </section>
 
-    </main>
+            <div id="tab-shop" class="tab-content active">
+                <div id="shop-list">
+                    </div>
+            </div>
 
-    <div id="settings-modal" class="modal-overlay hidden">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h2>Configurações</h2>
-                <button onclick="toggleSettings()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="setting-row">
-                    <span>Partículas de Clique</span>
-                    <input type="checkbox" id="setting-particles" checked>
+            <div id="tab-achievements" class="tab-content">
+                <div class="achieve-stats">
+                    Progresso: <span id="achieve-count">0</span>/<span id="achieve-total">0</span>
                 </div>
-                <div class="setting-row">
-                    <span>Salvar na Nuvem (Firebase)</span>
-                    <button class="btn-sm" onclick="manualSave()">Sincronizar Agora</button>
-                </div>
-                <hr>
-                <button class="btn-danger" onclick="resetGame()">RESETAR TODO PROGRESSO</button>
+                <div id="achieve-list">
+                    </div>
             </div>
-        </div>
+        </aside>
     </div>
 
     <script type="module" src="cdn.js"></script>
