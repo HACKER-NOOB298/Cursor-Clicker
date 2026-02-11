@@ -43,6 +43,37 @@
     <main id="app-screen" class="app-layout hidden">
         
         <aside class="sidebar left-panel">
+    
+    <button id="close-menu-mob" class="close-mob-btn">
+        <i class="fas fa-times"></i>
+    </button>
+
+    <div class="profile-box">
+        <div class="avatar"><i class="fas fa-user-astronaut"></i></div>
+        <div class="user-info">
+            <span id="display-name">Carregando...</span>
+            <small id="device-type">Detectando...</small>
+        </div>
+    </div>
+
+    <nav class="menu">
+        <button id="nav-rank"><i class="fas fa-trophy"></i> Leaderboard</button>
+        <button id="nav-achieve"><i class="fas fa-medal"></i> Conquistas</button>
+        <button id="nav-settings"><i class="fas fa-cog"></i> Configurações</button>
+    </nav>
+
+    <div class="bottom-actions">
+        <div class="save-status">
+            <small id="last-save-msg">Não salvo.</small>
+            <button id="btn-cloud-save" class="btn small"><i class="fas fa-cloud-upload-alt"></i> Salvar</button>
+        </div>
+        
+        <button id="btn-logout-sidebar" class="btn danger small">
+            <i class="fas fa-sign-out-alt"></i> SAIR DA CONTA
+        </button>
+    </div>
+</aside>
+
             <div class="profile-box">
                 <div class="avatar"><i class="fas fa-user-astronaut"></i></div>
                 <div class="user-info">
