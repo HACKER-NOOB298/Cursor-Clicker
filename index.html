@@ -4,81 +4,143 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cursor Clicker Ultimate</title>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <div id="auth-screen" class="overlay-screen">
+        <div class="auth-box">
+            <h1>CURSOR<span>ULTIMATE</span></h1>
+            <p>Evolua, Conquiste e Domine o Ranking.</p>
+            
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="auth-email" placeholder="Seu E-mail">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="auth-pass" placeholder="Sua Senha">
+            </div>
+
+            <div class="auth-buttons">
+                <button onclick="window.doLogin()" class="btn-primary">ENTRAR</button>
+                <button onclick="window.doRegister()" class="btn-secondary">CRIAR CONTA</button>
+            </div>
+            <button onclick="window.doAnon()" class="btn-text">Jogar como Convidado (Sem Salvar)</button>
+        </div>
+    </div>
+
     <div id="toast-container"></div>
 
-    <div id="app">
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-cog"></i> Ajustes</h2>
+                <button onclick="toggleModal('settings-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-row">
+                    <label>Efeitos Sonoros</label>
+                    <button id="btn-sound-toggle" onclick="toggleSound()">ON</button>
+                </div>
+                <div class="setting-row">
+                    <label>Tamanho do Cursor</label>
+                    <input type="range" id="cursor-size-slider" min="80" max="250" value="140" oninput="updateCursorSize(this.value)">
+                </div>
+                <div class="setting-row">
+                    <label>Partículas</label>
+                    <input type="checkbox" checked id="check-particles">
+                </div>
+                <hr>
+                <button class="btn-danger" onclick="window.doLogout()">SAIR DA CONTA</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="rank-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-trophy"></i> Top 10 Global</h2>
+                <button onclick="toggleModal('rank-modal')">&times;</button>
+            </div>
+            <div id="rank-list" class="modal-body list-body">
+                <p>Carregando...</p>
+            </div>
+            <button class="btn-primary full-width" onclick="refreshRank()">Atualizar</button>
+        </div>
+    </div>
+
+    <main id="app" class="hidden">
+        
         <aside class="sidebar-left">
-            <div class="logo">
-                <i class="fas fa-mouse"></i> CLICKER<span>PRO</span>
+            <div class="logo-area">
+                <i class="fas fa-mouse-pointer"></i> CC<span>V5</span>
             </div>
             
-            <div class="user-card">
+            <div class="player-profile">
                 <div class="avatar"><i class="fas fa-user-astronaut"></i></div>
-                <div class="user-info">
-                    <span id="player-name">Visitante</span>
-                    <small id="rank-name">Iniciante</small>
+                <div class="info">
+                    <span id="player-email">Visitante</span>
+                    <small id="player-level">Nível 1</small>
                 </div>
             </div>
 
-            <nav class="menu">
-                <button onclick="window.saveGame()"><i class="fas fa-save"></i> Salvar Jogo</button>
-                <button onclick="window.toggleSound()" id="btn-sound"><i class="fas fa-volume-up"></i> Som: ON</button>
-                <button onclick="window.hardReset()" class="danger"><i class="fas fa-trash"></i> Resetar</button>
+            <nav class="main-menu">
+                <button onclick="toggleModal('rank-modal')"><i class="fas fa-crown"></i> Ranking</button>
+                <button onclick="toggleModal('settings-modal')"><i class="fas fa-sliders-h"></i> Opções</button>
+                <button onclick="window.manualSave()"><i class="fas fa-cloud-upload-alt"></i> Salvar</button>
             </nav>
 
-            <div class="chroma-info">
-                <div class="color-dot" id="chroma-dot"></div>
-                <p>Tema: <span id="chroma-name">Padrão</span></p>
-                <small>Nível do Cursor: <span id="cursor-lvl">1</span></small>
+            <div class="chroma-status">
+                <div class="color-preview" id="chroma-preview"></div>
+                <span>Cor Atual: <b id="chroma-name">Padrão</b></span>
             </div>
         </aside>
 
-        <section class="game-center">
-            <div class="stats-header">
-                <div class="stat-item">
+        <section class="game-stage">
+            <div class="stats-hud">
+                <div class="hud-item">
                     <small>DIAMANTES</small>
-                    <span id="score">0</span>
+                    <span id="score-display">0</span>
                 </div>
-                <div class="stat-item">
+                <div class="hud-item">
                     <small>POR SEGUNDO</small>
-                    <span id="cps">0.0</span>
+                    <span id="cps-display">0.0</span>
                 </div>
             </div>
 
-            <div class="click-area">
-                <div class="ripple-container" id="ripples"></div>
-                <button id="big-cookie">
-                    <i class="fas fa-mouse-pointer" id="main-cursor"></i>
+            <div class="click-zone">
+                <button id="main-cursor-btn">
+                    <i class="fas fa-mouse-pointer" id="visual-cursor"></i>
                 </button>
-            </div>
+                <div class="hitbox-helper"></div> </div>
         </section>
 
         <aside class="sidebar-right">
-            <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('shop')"><i class="fas fa-shopping-cart"></i> Loja</button>
-                <button class="tab-btn" onclick="switchTab('achievements')"><i class="fas fa-trophy"></i> Conquistas</button>
+            <div class="tabs-header">
+                <button class="tab-link active" onclick="openTab('shop')">LOJA</button>
+                <button class="tab-link" onclick="openTab('achievements')">TROFÉUS</button>
             </div>
 
             <div id="tab-shop" class="tab-content active">
-                <div id="shop-list">
+                <div id="upgrades-list">
                     </div>
             </div>
 
             <div id="tab-achievements" class="tab-content">
-                <div class="achieve-stats">
-                    Progresso: <span id="achieve-count">0</span>/<span id="achieve-total">0</span>
+                <div class="progress-bar-container">
+                    <div id="achieve-progress" class="progress-fill" style="width: 0%"></div>
                 </div>
-                <div id="achieve-list">
+                <div id="achievements-list">
                     </div>
             </div>
         </aside>
-    </div>
+
+    </main>
 
     <script type="module" src="cdn.js"></script>
     <script type="module" src="script.js"></script>
