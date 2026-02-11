@@ -389,3 +389,25 @@ function openModal(id) {
     document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
     document.getElementById(id).classList.remove('hidden');
 }
+function setupGameButtons() {
+    // ... seus códigos anteriores ...
+
+    // --- CÓDIGO NOVO PARA ADICIONAR ---
+    
+    // 1. Botão de Fechar Menu (Esquerdo)
+    const closeMenuBtn = document.getElementById('close-menu-mob');
+    if (closeMenuBtn) {
+        closeMenuBtn.onclick = () => {
+            document.querySelector('.left-panel').classList.remove('active');
+        };
+    }
+
+    // 2. Botão de Sair (Lateral)
+    const logoutBtnSide = document.getElementById('btn-logout-sidebar');
+    if (logoutBtnSide) {
+        logoutBtnSide.onclick = logout; // Usa a função logout importada do cdn.js
+    }
+
+    // ... resto dos códigos ...
+}
+
