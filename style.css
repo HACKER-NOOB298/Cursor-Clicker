@@ -1,200 +1,156 @@
 :root {
-    --bg-deep: #05070a;
-    --bg-surface: #0f1218;
-    --bg-card: #161b22;
-    --accent: #00d4ff;
-    --text-high: #ffffff;
-    --text-med: #8b949e;
-    --text-low: #484f58;
-    --gold: #ffcf3e;
-    --danger: #ff4444;
-    --success: #2ea043;
-    --border: #30363d;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --bg-dark: #050505;
+    --bg-panel: #0f1115;
+    --bg-item: #161b22;
+    --primary: #00d4ff; /* Cor dinâmica */
+    --text-main: #ffffff;
+    --text-muted: #8b949e;
+    --gold: #ffc107;
+    --border: 1px solid #30363d;
 }
 
-/* RESET E BASE */
+/* --- ESSENCIAL: REMOVE A CAIXA AZUL E SELEÇÃO --- */
 * {
     margin: 0; padding: 0; box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent) transparent;
+    -webkit-tap-highlight-color: transparent; /* Mata o flash azul no Android/iOS */
+    -webkit-touch-callout: none;
+    user-select: none; -webkit-user-select: none;
+    font-family: 'Rajdhani', sans-serif;
+    outline: none;
 }
 
 body {
-    background: var(--bg-deep);
-    color: var(--text-high);
-    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
     height: 100vh;
     overflow: hidden;
 }
 
-/* SCROLLBAR PERSONALIZADA */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
-/* LAYOUT PRINCIPAL */
-#app-container {
+/* --- LAYOUT GRID (PC) --- */
+#app {
     display: grid;
-    grid-template-columns: 280px 1fr 380px;
+    grid-template-columns: 260px 1fr 350px; /* Esquerda | Centro | Direita */
     height: 100vh;
 }
 
-/* SIDEBAR E CARDS */
-.stats-sidebar {
-    background: var(--bg-surface);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    padding: 24px;
-}
-
-.brand h1 { font-weight: 800; letter-spacing: -1px; }
-.brand h1 span { color: var(--accent); }
-
-.player-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin: 24px 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.avatar {
-    width: 48px; height: 48px;
-    background: var(--accent);
-    border-radius: 10px;
-    display: grid; place-items: center;
-    color: var(--bg-deep);
-    font-size: 1.2rem;
-}
-
-/* BOTÕES DE NAVEGAÇÃO */
-.side-nav { flex: 1; }
-.nav-item {
-    width: 100%;
-    padding: 14px;
-    background: transparent;
-    border: none;
-    color: var(--text-med);
-    text-align: left;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-bottom: 4px;
-    transition: var(--transition);
-}
-.nav-item:hover, .nav-item.active {
-    background: rgba(0, 212, 255, 0.1);
-    color: var(--accent);
-}
-
-/* ÁREA DE CLIQUE CENTRAL */
-.game-core {
-    background: radial-gradient(circle at center, #111827 0%, var(--bg-deep) 100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    padding: 40px;
-    position: relative;
-}
-
-.main-stats { text-align: center; display: flex; gap: 40px; }
-.stat-box label { font-size: 0.7rem; color: var(--text-med); letter-spacing: 2px; }
-#main-score { font-size: 5rem; font-weight: 800; display: block; font-family: 'JetBrains Mono'; }
-
-/* O MOUSE GIGANTE */
-.click-engine { position: relative; width: 300px; height: 300px; display: grid; place-items: center; }
-#main-target {
-    background: transparent;
-    border: none;
-    font-size: 160px;
-    color: var(--accent);
-    cursor: pointer;
+/* --- SIDEBAR ESQUERDA --- */
+.sidebar-left {
+    background: var(--bg-panel);
+    border-right: var(--border);
+    padding: 20px;
+    display: flex; flex-direction: column;
     z-index: 10;
-    filter: drop-shadow(0 0 30px var(--accent));
-    transition: transform 0.05s ease-out;
-}
-#main-target:active { transform: scale(0.85); }
-
-/* AURA PULSANTE */
-.pulse-aura {
-    position: absolute;
-    width: 200px; height: 200px;
-    border: 2px solid var(--accent);
-    border-radius: 50%;
-    animation: aura-pulse 2s infinite;
 }
 
-@keyframes aura-pulse {
-    0% { transform: scale(0.8); opacity: 0.8; }
-    100% { transform: scale(2.2); opacity: 0; }
+.logo { font-size: 24px; font-weight: 800; margin-bottom: 30px; letter-spacing: 2px; }
+.logo span { color: var(--primary); }
+
+.user-card { background: var(--bg-item); padding: 15px; border-radius: 10px; display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
+.avatar { width: 40px; height: 40px; background: var(--primary); border-radius: 50%; display: grid; place-items: center; color: #000; }
+
+.menu button {
+    width: 100%; padding: 12px; margin-bottom: 8px;
+    background: transparent; border: 1px solid #333; color: #ccc;
+    cursor: pointer; text-align: left; border-radius: 5px; transition: 0.2s;
+}
+.menu button:hover { border-color: var(--primary); color: var(--primary); }
+.menu button.danger:hover { border-color: #ff4444; color: #ff4444; }
+
+.chroma-info { margin-top: auto; text-align: center; border-top: 1px solid #333; padding-top: 20px; }
+.color-dot { width: 20px; height: 20px; background: var(--primary); border-radius: 50%; margin: 0 auto 10px; box-shadow: 0 0 10px var(--primary); }
+
+/* --- ÁREA CENTRAL (JOGO) --- */
+.game-center {
+    background: radial-gradient(circle at center, #1a202c 0%, #000 100%);
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 
-/* PAINEL DA LOJA */
-.shop-panel {
-    background: var(--bg-surface);
-    border-left: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
+.stats-header { position: absolute; top: 40px; text-align: center; display: flex; gap: 50px; }
+.stat-item { display: flex; flex-direction: column; }
+.stat-item small { color: var(--text-muted); font-size: 12px; letter-spacing: 2px; }
+#score { font-size: 4rem; font-family: 'Roboto Mono'; font-weight: 700; text-shadow: 0 0 20px rgba(0,212,255,0.3); }
+#cps { font-size: 1.5rem; color: var(--text-muted); font-family: 'Roboto Mono'; }
+
+.click-area { position: relative; width: 300px; height: 300px; display: grid; place-items: center; }
+
+#big-cookie {
+    background: none; border: none; cursor: pointer;
+    font-size: 140px; color: var(--primary);
+    filter: drop-shadow(0 0 25px var(--primary));
+    transition: transform 0.05s, color 0.5s;
+    z-index: 5;
+}
+#big-cookie:active { transform: scale(0.9); }
+
+/* --- SIDEBAR DIREITA (LOJA) --- */
+.sidebar-right {
+    background: var(--bg-panel);
+    border-left: var(--border);
+    display: flex; flex-direction: column;
 }
 
-.items-container { flex: 1; overflow-y: auto; padding: 16px; }
-
-/* ITEM DA LOJA ESTILIZADO */
-.upgrade-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    cursor: pointer;
-    transition: var(--transition);
+.tabs { display: flex; background: #000; }
+.tab-btn {
+    flex: 1; padding: 15px; background: none; border: none;
+    color: #666; font-weight: bold; cursor: pointer; border-bottom: 2px solid transparent;
 }
-.upgrade-card:hover { border-color: var(--accent); transform: translateX(-5px); }
-.upgrade-card.locked { opacity: 0.4; filter: grayscale(1); cursor: not-allowed; }
+.tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: rgba(255,255,255,0.05); }
 
-.icon-box {
-    width: 50px; height: 50px;
-    background: var(--bg-deep);
-    border-radius: 10px;
-    display: grid; place-items: center;
-    font-size: 1.5rem;
-    color: var(--accent);
+.tab-content { display: none; flex: 1; overflow-y: auto; padding: 15px; }
+.tab-content.active { display: block; }
+
+/* ITENS DA LOJA */
+.shop-item {
+    display: flex; align-items: center; padding: 12px; margin-bottom: 8px;
+    background: var(--bg-item); border: 1px solid #333; border-radius: 8px;
+    cursor: pointer; transition: 0.2s;
 }
+.shop-item:hover { border-color: var(--primary); transform: translateX(-2px); }
+.shop-item.locked { opacity: 0.4; filter: grayscale(1); pointer-events: none; }
 
-.up-details { flex: 1; }
-.up-name { font-weight: 600; display: block; }
-.up-cost { color: var(--gold); font-size: 0.85rem; font-family: 'JetBrains Mono'; }
-.up-qty { font-size: 1.8rem; font-weight: 800; color: var(--text-low); }
+.item-icon { width: 40px; font-size: 20px; color: var(--primary); text-align: center; }
+.item-data { flex: 1; }
+.item-name { display: block; font-weight: bold; font-size: 14px; }
+.item-cost { color: var(--gold); font-size: 12px; font-family: 'Roboto Mono'; }
+.item-qty { font-size: 20px; font-weight: bold; color: #444; }
 
-/* RESPONSIVIDADE MOBILE */
-@media (max-width: 1100px) {
-    #app-container { grid-template-columns: 1fr; grid-template-rows: auto 1fr 350px; }
-    .stats-sidebar { flex-direction: row; height: 80px; padding: 10px; align-items: center; }
-    .side-nav, .brand small, .prestige-area { display: none; }
-    #main-score { font-size: 3rem; }
-    .shop-panel { border-left: none; border-top: 1px solid var(--border); height: 350px; }
+/* CONQUISTAS */
+.achieve-item {
+    padding: 10px; margin-bottom: 8px; background: #1a1a1a;
+    border-left: 3px solid #444; border-radius: 4px; opacity: 0.5;
 }
+.achieve-item.unlocked { opacity: 1; border-left-color: var(--gold); background: #222; }
+.achieve-title { font-weight: bold; color: var(--gold); font-size: 14px; }
+.achieve-desc { font-size: 12px; color: #aaa; }
 
-/* TEXTO FLUTUANTE */
-.particle-text {
-    position: absolute;
-    font-weight: 800;
-    pointer-events: none;
-    animation: fly-up 0.8s ease-out forwards;
+/* PARTICULAS E TOAST */
+.float-text {
+    position: absolute; font-weight: bold; color: var(--text-main);
+    pointer-events: none; animation: floatUp 0.8s ease-out forwards;
 }
+@keyframes floatUp { to { transform: translateY(-80px); opacity: 0; } }
 
-@keyframes fly-up {
-    0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(-120px); opacity: 0; }
+.toast {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    background: #222; border: 1px solid var(--primary); padding: 10px 20px;
+    border-radius: 20px; z-index: 100; animation: fadeInOut 3s forwards;
+    display: flex; align-items: center; gap: 10px;
+}
+@keyframes fadeInOut { 0% {top: -50px;} 10% {top: 20px;} 90% {top: 20px; opacity: 1;} 100% {top: -50px; opacity: 0;} }
+
+/* --- RESPONSIVIDADE (MOBILE) --- */
+@media (max-width: 900px) {
+    #app {
+        display: flex; flex-direction: column; /* Pilha vertical */
+    }
+    .sidebar-left {
+        flex-direction: row; align-items: center; justify-content: space-between;
+        padding: 10px; height: 60px; border-right: none; border-bottom: var(--border);
+    }
+    .sidebar-left .menu, .sidebar-left .chroma-info, .sidebar-left .logo, .sidebar-left .user-card small { display: none; }
+    .game-center { flex: 1; min-height: 40vh; }
+    #score { font-size: 3rem; }
+    #big-cookie { font-size: 100px; }
+    .sidebar-right { height: 45vh; border-left: none; border-top: var(--border); }
 }
