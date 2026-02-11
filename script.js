@@ -1,164 +1,285 @@
-/**
- * CURSOR CLICKER ELITE ENGINE
- * Desenvolvido para máxima performance e diversão.
- */
-
 import { saveGameData, loadGameData, auth } from './cdn.js';
 
-// --- 1. CONFIGURAÇÃO DE DADOS ---
-const UPGRADES = [
-    { id: 0, name: "Micro-Transistor", cost: 15, cps: 0, click: 1, icon: "fa-microchip" },
-    { id: 1, name: "Bot Aprendiz", cost: 100, cps: 1, click: 0, icon: "fa-robot" },
-    { id: 2, name: "Servidor VPS", cost: 1100, cps: 8, click: 0, icon: "fa-server" },
-    { id: 3, name: "Farm de Cliques", cost: 12000, cps: 47, click: 0, icon: "fa-tractor" },
-    { id: 4, name: "Mina de Cripto", cost: 130000, cps: 260, click: 0, icon: "fa-bitcoin-sign" },
-    { id: 5, name: "IA Treinada", cost: 1400000, cps: 1400, click: 0, icon: "fa-brain" },
-    { id: 6, name: "Quantum Rig", cost: 20000000, cps: 7800, click: 0, icon: "fa-atom" },
-    { id: 7, name: "Sonda de Dados", cost: 330000000, cps: 44000, click: 0, icon: "fa-satellite" },
-    { id: 8, name: "Nuvem Privada", cost: 5100000000, cps: 260000, click: 0, icon: "fa-cloud" },
-    { id: 9, name: "Holograma Dev", cost: 75000000000, cps: 1600000, click: 0, icon: "fa-project-diagram" },
-    { id: 10, name: "Motor de Dobra", cost: 1e12, cps: 1e7, click: 0, icon: "fa-rocket" },
-    { id: 11, name: "Singularidade", cost: 14e12, cps: 65e6, click: 0, icon: "fa-circle-notch" },
-    { id: 12, name: "Matriz Global", cost: 170e12, cps: 430e6, click: 0, icon: "fa-globe" },
-    { id: 13, name: "Antimatéria", cost: 2e15, cps: 3e9, click: 0, icon: "fa-flask" },
-    { id: 14, name: "Cursor Divino", cost: 26e15, cps: 21e9, click: 0, icon: "fa-hand-sparkles" }
-];
-
-const CHROMA_SYSTEM = [
-    { name: "Cyber Blue", hex: "#00d4ff" }, { name: "Neon Lime", hex: "#39ff14" }, { name: "Ruby", hex: "#ff0040" },
-    { name: "Gold Rush", hex: "#ffcc00" }, { name: "Amethyst", hex: "#9d00ff" }, { name: "Orange Sun", hex: "#ff6600" },
-    { name: "Pink Panther", hex: "#ff00ff" }, { name: "Ice Cold", hex: "#a5f2ff" }, { name: "Deep Sea", hex: "#0040ff" },
-    { name: "Toxic", hex: "#adff2f" }, { name: "Blood", hex: "#800000" }, { name: "Cloud", hex: "#f0f0f0" },
-    { name: "Chocolate", hex: "#d2691e" }, { name: "Mint", hex: "#98fb98" }, { name: "Steel", hex: "#708090" },
-    { name: "Void", hex: "#1a1a1a" }, { name: "Solar Flare", hex: "#ff4500" }, { name: "Lavender", hex: "#e6e6fa" },
-    { name: "Forest", hex: "#228b22" }, { name: "Electric", hex: "#7fffd4" }, { name: "Royal", hex: "#4169e1" },
-    { name: "Salmon", hex: "#fa8072" }, { name: "Sand", hex: "#f4a460" }, { name: "Emerald", hex: "#50c878" },
-    { name: "Fuchsia", hex: "#ff00ff" }, { name: "Crimson", hex: "#dc143c" }, { name: "Titanium", hex: "#d1d1d1" },
-    { name: "Night", hex: "#0c0c0c" }, { name: "Plasma", hex: "#ff0080" }, { name: "GOD", hex: "#ffffff" }
-];
-
-// --- 2. ESTADO DO JOGO ---
-let game = {
-    diamonds: 0,
-    inventory: Array(15).fill(0),
-    totalClicks: 0,
-    startTime: Date.now(),
-    multiplier: 1
+// --- SISTEMA DE SOM (WEB AUDIO API) ---
+// Gera sons sem precisar de arquivos mp3
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+const SoundSys = {
+    enabled: true,
+    playClick: () => {
+        if (!SoundSys.enabled) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        // Som de "Click" agudo e curto
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+    },
+    playBuy: () => {
+        if (!SoundSys.enabled) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        // Som de "Moeda"
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+    },
+    playAchievement: () => {
+        if (!SoundSys.enabled) return;
+        // Som glorioso (placeholder simples)
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.5);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.5);
+    }
 };
 
-// --- 3. CORE LOGIC ---
-const target = document.getElementById('main-target');
+// --- CONFIGURAÇÃO ---
+const UPGRADES = [
+    { name: "Cursor Reforçado", cost: 15, cps: 0, click: 1, icon: "fa-mouse" },
+    { name: "Auto-Clicker", cost: 100, cps: 1, click: 0, icon: "fa-robot" },
+    { name: "Script Kiddie", cost: 500, cps: 5, click: 0, icon: "fa-user-secret" },
+    { name: "Fazenda de GPU", cost: 3000, cps: 15, click: 0, icon: "fa-server" },
+    { name: "Mineradora BTC", cost: 10000, cps: 50, click: 0, icon: "fa-bitcoin-sign" },
+    { name: "Hacker de Elite", cost: 40000, cps: 120, click: 0, icon: "fa-laptop-code" },
+    { name: "Botnet Global", cost: 200000, cps: 400, click: 0, icon: "fa-network-wired" },
+    { name: "IA de Ponta", cost: 1000000, cps: 1500, click: 0, icon: "fa-brain" },
+    { name: "Nanobots", cost: 5000000, cps: 5000, click: 0, icon: "fa-bacterium" },
+    { name: "Computador Quântico", cost: 20000000, cps: 20000, click: 0, icon: "fa-atom" },
+    { name: "Matéria Escura", cost: 100000000, cps: 100000, click: 0, icon: "fa-cloud-moon" },
+    { name: "Viagem no Tempo", cost: 1000000000, cps: 500000, click: 0, icon: "fa-clock" },
+    { name: "Império Galáctico", cost: 5000000000, cps: 2000000, click: 0, icon: "fa-space-shuttle" },
+    { name: "Realidade Virtual", cost: 20000000000, cps: 10000000, click: 0, icon: "fa-vr-cardboard" },
+    { name: "Onipotência", cost: 100000000000, cps: 50000000, click: 0, icon: "fa-hand-sparkles" }
+];
 
-function handleClick(e) {
-    const clickPower = (1 + (game.inventory[0] * UPGRADES[0].click)) * game.multiplier;
-    game.diamonds += clickPower;
-    game.totalClicks++;
+const COLORS = [
+    {n:"Padrão",h:"#00d4ff"}, {n:"Verde",h:"#00ff00"}, {n:"Rosa",h:"#ff00ff"}, {n:"Ouro",h:"#ffd700"}, {n:"Laranja",h:"#ff8800"},
+    {n:"Vermelho",h:"#ff0000"}, {n:"Roxo",h:"#aa00ff"}, {n:"Branco",h:"#ffffff"}, {n:"Ciano",h:"#00ffff"}, {n:"Cinza",h:"#aaaaaa"},
+    {n:"Chocolate",h:"#d2691e"}, {n:"Menta",h:"#98fb98"}, {n:"Azul Royal",h:"#4169e1"}, {n:"Rubi",h:"#e0115f"}, {n:"Lima",h:"#bfff00"},
+    {n:"Céu",h:"#87ceeb"}, {n:"Fúcsia",h:"#ff00ff"}, {n:"Coral",h:"#ff7f50"}, {n:"Turquesa",h:"#40e0d0"}, {n:"Lavanda",h:"#e6e6fa"},
+    {n:"Oliva",h:"#808000"}, {n:"Salmão",h:"#fa8072"}, {n:"Areia",h:"#f4a460"}, {n:"Orquídea",h:"#da70d6"}, {n:"Prata",h:"#c0c0c0"},
+    {n:"Bronze",h:"#cd7f32"}, {n:"Preto",h:"#333333"}, {n:"Neon",h:"#ccff00"}, {n:"Infinito",h:"#ffffff"}, {n:"GOD",h:"#ff0000"}
+];
 
-    createParticle(e.clientX, e.clientY, `+${formatNum(clickPower)}`);
-    updateUI();
-}
+const ACHIEVEMENTS = [
+    { id: 'click1', title: "Primeiro Passo", desc: "Clique 1 vez", req: (s) => s.clicks >= 1 },
+    { id: 'click100', title: "Dedo Rápido", desc: "100 Cliques manuais", req: (s) => s.clicks >= 100 },
+    { id: 'diam1k', title: "Rico", desc: "Tenha 1.000 Diamantes", req: (s) => s.diamonds >= 1000 },
+    { id: 'diam1m', title: "Milionário", desc: "Tenha 1 Milhão de Diamantes", req: (s) => s.diamonds >= 1000000 },
+    { id: 'upg1', title: "Evolução", desc: "Compre o primeiro upgrade", req: (s) => s.inventory[0] >= 1 },
+    { id: 'upg5', title: "Automatizado", desc: "Compre um Auto-Clicker", req: (s) => s.inventory[1] >= 1 },
+    { id: 'cps100', title: "Fábrica", desc: "Chegue a 100 CPS", req: (s) => getTotalCPS() >= 100 },
+    { id: 'color10', title: "Estiloso", desc: "Desbloqueie a 10ª Cor", req: (s) => s.inventory[0] >= 50 }
+];
 
-target.addEventListener('mousedown', handleClick);
+let state = {
+    diamonds: 0,
+    inventory: Array(15).fill(0),
+    clicks: 0,
+    achievements: [], // IDs das conquistas desbloqueadas
+    soundOn: true
+};
 
-function buyUpgrade(idx) {
-    const up = UPGRADES[idx];
-    const cost = Math.floor(up.cost * Math.pow(1.15, game.inventory[idx]));
+// --- CORE ---
+window.switchTab = (tab) => {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    event.currentTarget.classList.add('active');
+};
 
-    if (game.diamonds >= cost) {
-        game.diamonds -= cost;
-        game.inventory[idx]++;
-        updateUI();
-        renderShop();
-        showNotification(`${up.name} Adquirido!`);
+window.toggleSound = () => {
+    SoundSys.enabled = !SoundSys.enabled;
+    state.soundOn = SoundSys.enabled;
+    document.getElementById('btn-sound').innerHTML = `<i class="fas fa-volume-${state.soundOn ? 'up' : 'mute'}"></i> Som: ${state.soundOn ? 'ON' : 'OFF'}`;
+};
+
+window.hardReset = () => {
+    if(confirm("Tem certeza? Isso apaga TUDO.")) {
+        localStorage.removeItem('cursor_save');
+        location.reload();
     }
+};
+
+window.saveGame = () => {
+    saveGameData(state);
+    showToast('<i class="fas fa-save"></i> Jogo Salvo!');
+};
+
+// Inicialização
+async function init() {
+    const saved = await loadGameData();
+    if (saved) {
+        state = { ...state, ...saved };
+        SoundSys.enabled = state.soundOn ?? true;
+    }
+    window.toggleSound(); // Atualiza texto do botão
+    window.toggleSound(); // Reverte para estado correto
+    
+    renderShop();
+    renderAchievements();
+    updateUI();
+    
+    // Loop Principal
+    setInterval(() => {
+        const cps = getTotalCPS();
+        if(cps > 0) {
+            state.diamonds += cps / 10;
+            checkAchievements();
+            updateUI();
+        }
+    }, 100);
+    
+    // Auto-Save 30s
+    setInterval(() => saveGameData(state), 30000);
 }
 
-// --- 4. RENDERIZAÇÃO ---
-function renderShop() {
-    const container = document.getElementById('upgrade-list');
-    container.innerHTML = "";
+// Lógica de Clique
+document.getElementById('big-cookie').addEventListener('mousedown', (e) => {
+    // Resume audio context se o navegador tiver bloqueado
+    if (audioCtx.state === 'suspended') audioCtx.resume();
     
-    UPGRADES.forEach((up, i) => {
-        const cost = Math.floor(up.cost * Math.pow(1.15, game.inventory[i]));
-        const card = document.createElement('div');
-        card.className = `upgrade-card ${game.diamonds < cost ? 'locked' : ''}`;
-        card.innerHTML = `
-            <div class="icon-box"><i class="fas ${up.icon}"></i></div>
-            <div class="up-details">
-                <span class="up-name">${up.name}</span>
-                <span class="up-cost">💎 ${formatNum(cost)}</span>
+    const power = 1 + (state.inventory[0] * UPGRADES[0].click);
+    state.diamonds += power;
+    state.clicks++;
+    
+    SoundSys.playClick();
+    createParticles(e.clientX, e.clientY, `+${format(power)}`);
+    checkAchievements();
+    updateUI();
+});
+
+// Comprar Upgrade
+window.buy = (idx) => {
+    const u = UPGRADES[idx];
+    const cost = Math.floor(u.cost * Math.pow(1.15, state.inventory[idx]));
+    
+    if(state.diamonds >= cost) {
+        state.diamonds -= cost;
+        state.inventory[idx]++;
+        SoundSys.playBuy();
+        renderShop();
+        updateUI();
+    }
+};
+
+// Renderizadores
+function renderShop() {
+    const list = document.getElementById('shop-list');
+    list.innerHTML = UPGRADES.map((u, i) => {
+        const cost = Math.floor(u.cost * Math.pow(1.15, state.inventory[i]));
+        const locked = state.diamonds < cost ? 'locked' : '';
+        return `
+            <div class="shop-item ${locked}" onclick="window.buy(${i})">
+                <div class="item-icon"><i class="fas ${u.icon}"></i></div>
+                <div class="item-data">
+                    <span class="item-name">${u.name}</span>
+                    <span class="item-cost">💎 ${format(cost)}</span>
+                </div>
+                <div class="item-qty">${state.inventory[i]}</div>
             </div>
-            <div class="up-qty">${game.inventory[i]}</div>
         `;
-        card.onclick = () => buyUpgrade(i);
-        container.appendChild(card);
+    }).join('');
+}
+
+function renderAchievements() {
+    const list = document.getElementById('achieve-list');
+    let unlockedCount = 0;
+    
+    list.innerHTML = ACHIEVEMENTS.map(ach => {
+        const unlocked = state.achievements.includes(ach.id);
+        if(unlocked) unlockedCount++;
+        return `
+            <div class="achieve-item ${unlocked ? 'unlocked' : ''}">
+                <div class="achieve-title"><i class="fas fa-${unlocked ? 'check-circle' : 'lock'}"></i> ${ach.title}</div>
+                <div class="achieve-desc">${ach.desc}</div>
+            </div>
+        `;
+    }).join('');
+    
+    document.getElementById('achieve-count').innerText = unlockedCount;
+    document.getElementById('achieve-total').innerText = ACHIEVEMENTS.length;
+}
+
+function checkAchievements() {
+    let changed = false;
+    ACHIEVEMENTS.forEach(ach => {
+        if(!state.achievements.includes(ach.id) && ach.req(state)) {
+            state.achievements.push(ach.id);
+            showToast(`🏆 Conquista: ${ach.title}`);
+            SoundSys.playAchievement();
+            changed = true;
+        }
     });
+    if(changed) renderAchievements();
 }
 
 function updateUI() {
-    document.getElementById('main-score').innerText = formatNum(Math.floor(game.diamonds));
+    document.getElementById('score').innerText = format(Math.floor(state.diamonds));
+    document.getElementById('cps').innerText = format(getTotalCPS());
     
-    let totalCps = 0;
-    game.inventory.forEach((qty, i) => totalCps += qty * UPGRADES[i].cps);
-    document.getElementById('main-cps').innerText = formatNum(totalCps);
-
-    // Sistema Chroma (Muda a cada 5 níveis do primeiro upgrade)
-    const chromaIndex = Math.min(Math.floor(game.inventory[0] / 5), 29);
-    const theme = CHROMA_SYSTEM[chromaIndex];
-    document.documentElement.style.setProperty('--accent', theme.hex);
-    document.getElementById('current-color-name').innerText = theme.name;
-    document.getElementById('cursor-lvl-val').innerText = game.inventory[0] + 1;
+    // Cor Chroma
+    const lvl = state.inventory[0];
+    const colorIdx = Math.min(Math.floor(lvl / 5), COLORS.length - 1);
+    const color = COLORS[colorIdx];
+    
+    document.documentElement.style.setProperty('--primary', color.h);
+    document.getElementById('chroma-name').innerText = color.n;
+    document.getElementById('cursor-lvl').innerText = lvl + 1;
+    
+    // Atualiza status de bloqueio da loja em tempo real
+    const items = document.querySelectorAll('.shop-item');
+    UPGRADES.forEach((u, i) => {
+        const cost = Math.floor(u.cost * Math.pow(1.15, state.inventory[i]));
+        if(state.diamonds >= cost) items[i].classList.remove('locked');
+        else items[i].classList.add('locked');
+    });
 }
 
-// --- 5. UTILITÁRIOS ---
-function formatNum(num) {
-    if (num >= 1e12) return (num / 1e12).toFixed(2) + "T";
-    if (num >= 1e9) return (num / 1e9).toFixed(2) + "B";
-    if (num >= 1e6) return (num / 1e6).toFixed(1) + "M";
-    if (num >= 1000) return (num / 1000).toFixed(1) + "k";
+// Helpers
+function getTotalCPS() {
+    return UPGRADES.reduce((acc, u, i) => acc + (u.cps * state.inventory[i]), 0);
+}
+
+function format(num) {
+    if(num >= 1e6) return (num/1e6).toFixed(2) + "M";
+    if(num >= 1e3) return (num/1e3).toFixed(1) + "k";
     return num.toLocaleString();
 }
 
-function createParticle(x, y, text) {
-    const p = document.createElement('div');
-    p.className = 'particle-text';
-    p.style.left = x + 'px';
-    p.style.top = y + 'px';
-    p.style.color = 'var(--accent)';
-    p.innerText = text;
-    document.body.appendChild(p);
-    setTimeout(() => p.remove(), 800);
+function createParticles(x, y, txt) {
+    const el = document.createElement('div');
+    el.className = 'float-text';
+    el.innerText = txt;
+    el.style.left = x + 'px'; el.style.top = y + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 800);
 }
 
-function showNotification(msg) {
-    const container = document.getElementById('notif-container');
-    const n = document.createElement('div');
-    n.className = 'toast-msg';
-    n.innerText = msg;
-    container.appendChild(n);
-    setTimeout(() => n.remove(), 3000);
+function showToast(html) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = html;
+    document.getElementById('toast-container').appendChild(t);
+    setTimeout(() => t.remove(), 4000);
 }
 
-// --- 6. LOOPS ---
-setInterval(() => {
-    let cps = 0;
-    game.inventory.forEach((qty, i) => cps += qty * UPGRADES[i].cps);
-    if (cps > 0) {
-        game.diamonds += cps / 10;
-        updateUI();
-    }
-}, 100);
-
-// Auto-Save
-setInterval(() => saveGameData(game), 15000);
-
-// Inicialização
-window.onload = async () => {
-    const saved = await loadGameData();
-    if (saved) game = { ...game, ...saved };
-    
-    document.getElementById('loader').classList.add('hidden');
-    document.getElementById('app-container').classList.remove('hidden');
-    renderShop();
-    updateUI();
-};
+init();
