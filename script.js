@@ -1,226 +1,391 @@
 import { 
-    loginUser, registerUser, resetPassword, saveGameData, 
-    loadGameData, getLeaderboard, auth 
+    loginUser, registerUser, loginAnon, resetPass, logout, 
+    saveGameCloud, loadGameCloud, getLeaderboardData, auth 
 } from './cdn.js';
 
-import { registerUser, loginUser, loginAnonymous, logoutUser, saveGameData, loadGameData, getLeaderboard, auth } from './cdn.js';
-
-
-// --- CONFIGURAÇÃO: 15 EVOLUÇÕES ---
+// --- DADOS DO JOGO ---
+// 15 Evoluções
 const UPGRADES = [
-    { id: 0, n: "Mouse Plástico", cost: 15, cps: 0, click: 1, icon: "fa-mouse" },
-    { id: 1, n: "Auto-Clicker", cost: 100, cps: 1, click: 0, icon: "fa-robot" },
-    { id: 2, n: "Script Python", cost: 500, cps: 5, click: 0, icon: "fa-code" },
-    { id: 3, n: "PC Gaming", cost: 2000, cps: 18, click: 0, icon: "fa-desktop" },
-    { id: 4, n: "Servidor Nuvem", cost: 10000, cps: 55, click: 0, icon: "fa-cloud" },
-    { id: 5, n: "Bot-Net", cost: 50000, cps: 160, click: 0, icon: "fa-network-wired" },
-    { id: 6, n: "Hacker Profissional", cost: 250000, cps: 500, click: 0, icon: "fa-user-secret" },
-    { id: 7, n: "Inteligência Artificial", cost: 1000000, cps: 1800, click: 0, icon: "fa-brain" },
-    { id: 8, n: "Super Computador", cost: 5000000, cps: 6500, click: 0, icon: "fa-microchip" },
-    { id: 9, n: "Chip Neural", cost: 25000000, cps: 20000, click: 0, icon: "fa-bolt" },
-    { id: 10, n: "Satélite de Cliques", cost: 150000000, cps: 85000, click: 0, icon: "fa-satellite" },
-    { id: 11, n: "Dobra Temporal", cost: 900000000, cps: 350000, click: 0, icon: "fa-history" },
-    { id: 12, n: "Realidade Simulada", cost: 5000000000, cps: 1200000, click: 0, icon: "fa-vr-cardboard" },
-    { id: 13, n: "Mão de Deus", cost: 50000000000, cps: 6000000, click: 0, icon: "fa-hand-sparkles" },
-    { id: 14, n: "Big Bang 2.0", cost: 999999999999, cps: 30000000, click: 0, icon: "fa-infinity" }
+    { id: 0, nome: "Cursor de Plástico", base: 15, cps: 0, click: 1, icon: "fa-mouse" },
+    { id: 1, nome: "Auto-Clicker v1", base: 100, cps: 1, click: 0, icon: "fa-robot" },
+    { id: 2, nome: "Estagiário de TI", base: 500, cps: 5, click: 0, icon: "fa-user-graduate" },
+    { id: 3, nome: "Script Python", base: 2000, cps: 15, click: 0, icon: "fa-code" },
+    { id: 4, nome: "PC Gamer RGB", base: 8000, cps: 50, click: 0, icon: "fa-desktop" },
+    { id: 5, nome: "Servidor Nuvem", base: 30000, cps: 150, click: 0, icon: "fa-cloud" },
+    { id: 6, nome: "Fazenda de Bots", base: 100000, cps: 400, click: 0, icon: "fa-network-wired" },
+    { id: 7, nome: "Inteligência Artificial", base: 500000, cps: 1200, click: 0, icon: "fa-brain" },
+    { id: 8, nome: "Hacker de Elite", base: 2000000, cps: 5000, click: 0, icon: "fa-user-secret" },
+    { id: 9, nome: "Computador Quântico", base: 10000000, cps: 15000, click: 0, icon: "fa-atom" },
+    { id: 10, nome: "Nanobots", base: 50000000, cps: 50000, click: 0, icon: "fa-bacterium" },
+    { id: 11, nome: "Satélite Orbital", base: 250000000, cps: 150000, click: 0, icon: "fa-satellite" },
+    { id: 12, nome: "Manipulador do Tempo", base: 1000000000, cps: 500000, click: 0, icon: "fa-clock" },
+    { id: 13, nome: "Matrix Pessoal", base: 5000000000, cps: 2000000, click: 0, icon: "fa-vr-cardboard" },
+    { id: 14, nome: "Dedo de Deus", base: 99999999999, cps: 10000000, click: 0, icon: "fa-hand-sparkles" }
 ];
 
-// --- 30 CORES DINÂMICAS ---
-const COLORS = ["#00d4ff", "#00ff00", "#ff00ff", "#ff9300", "#ff007f", "#ffd700", "#ffffff", "#ff0000", "#0044ff", "#40e0d0", "#ccff00", "#7f00ff", "#ff7f50", "#9966cc", "#c0c0c0", "#cd7f32", "#98fb98", "#cf1020", "#87ceeb", "#ffdab9", "#4b0082", "#50c878", "#e0115f", "#0f52ba", "#404040", "#8a2be2", "#aaff00", "#191970", "#fafad2", "#ff0044"];
+// 30 Cores que mudam conforme o nível do cursor (Upgrade ID 0)
+const COLORS = [
+    "#00d4ff", "#00ff9d", "#eaff00", "#ffaa00", "#ff0055", // Nv 0-4
+    "#d600ff", "#7300ff", "#002aff", "#00f7ff", "#ffffff", // Nv 5-9
+    "#ff4d4d", "#4dff88", "#4d88ff", "#ffff4d", "#ff4dff", // Nv 10-14
+    "#ffa64d", "#4dffa6", "#a64dff", "#ff80bf", "#80ffbf", // Nv 15-19
+    "#bf80ff", "#ffbf80", "#bfbfbf", "#ff0000", "#00ff00", // Nv 20-24
+    "#0000ff", "#ffff00", "#00ffff", "#ff00ff", "#gold"    // Nv 25-29
+];
 
+// Conquistas
+const ACHIEVEMENTS = [
+    { id: "c1", nome: "Iniciante", req: 100, desc: "Clique 100 vezes" },
+    { id: "c2", nome: "Milionário", req: 1000000, desc: "Tenha 1 Milhão de Diamantes" },
+    { id: "c3", nome: "Viciado", req: 10000, desc: "Tenha 10k cliques totais" }
+];
+
+// ESTADO DO JOGO
 let state = {
     diamonds: 0,
     inventory: Array(15).fill(0),
-    settings: { sound: true, size: 140 },
-    totalClicks: 0
+    totalClicks: 0,
+    startTime: Date.now(),
+    achievements: [],
+    settings: { sound: true, size: 120 }
 };
 
-// --- ÁUDIO PROCEDURAL ---
-const playSound = (f) => {
+// --- ÁUDIO (SINTETIZADOR) ---
+const playSound = (type) => {
     if (!state.settings.sound) return;
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.frequency.value = f;
-    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.1);
-    o.start(); o.stop(ctx.currentTime + 0.1);
-};
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
 
-// --- FUNÇÃO PRINCIPAL: LOGIN E INICIALIZAÇÃO ---
-document.getElementById('btn-login').onclick = async () => {
-    const e = document.getElementById('auth-email').value;
-    const p = document.getElementById('auth-pass').value;
-    const res = await loginUser(e, p);
-    if (res.success) initGame(); else showError(res.error);
-};
-
-document.getElementById('btn-register').onclick = async () => {
-    const e = document.getElementById('auth-email').value;
-    const p = document.getElementById('auth-pass').value;
-    const res = await registerUser(e, p);
-    if (res.success) initGame(); else showError(res.error);
-};
-
-document.getElementById('btn-forgot').onclick = () => {
-    document.getElementById('reset-modal').classList.remove('hidden');
-};
-
-document.getElementById('btn-confirm-reset').onclick = async () => {
-    const email = document.getElementById('reset-email-input').value;
-    const res = await resetPassword(email);
-    if (res.success) {
-        alert("E-mail de recuperação enviado!");
-        document.getElementById('reset-modal').classList.add('hidden');
-    } else alert(res.error);
-};
-
-function showError(m) {
-    const el = document.getElementById('auth-msg');
-    el.innerText = m; el.style.display = 'block';
-}
-
-// --- CORE GAMEPLAY ---
-async function initGame() {
-    document.getElementById('auth-screen').classList.add('hidden');
-    document.getElementById('app').classList.remove('hidden');
-
-    const saved = await loadGameData();
-    if (saved) state = { ...state, ...saved };
-
-    document.getElementById('player-name').innerText = auth.currentUser.email ? auth.currentUser.email.split('@')[0] : "Anónimo";
-
-    renderShop();
-    updateUI();
-    
-    // Loop de Ganho Passivo
-    setInterval(() => {
-        const totalCPS = UPGRADES.reduce((acc, u, i) => acc + (u.cps * state.inventory[i]), 0);
-        if (totalCPS > 0) {
-            state.diamonds += totalCPS / 10;
-            updateUI();
+        if (type === 'click') {
+            osc.frequency.setValueAtTime(400 + Math.random() * 200, ctx.currentTime);
+            osc.type = 'sine';
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.1);
+        } else if (type === 'buy') {
+            osc.frequency.setValueAtTime(600, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.1);
+            osc.type = 'square';
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.2);
         }
-    }, 100);
+    } catch(e) {}
+};
 
-    // Auto-Save
-    setInterval(() => saveGameData(state), 30000);
+// --- INICIALIZAÇÃO ---
+document.addEventListener('DOMContentLoaded', () => {
+    detectDevice();
+    setupAuthButtons();
+    setupGameButtons();
+    setupHotkeys();
+    
+    // Auto-Save Loop (a cada 30s)
+    setInterval(() => {
+        if(auth.currentUser) saveGame();
+    }, 30000);
+
+    // Game Loop (CPS)
+    setInterval(gameLoop, 100);
+});
+
+// --- LÓGICA DE JOGO ---
+function gameLoop() {
+    let cps = calculateCPS();
+    if (cps > 0) {
+        state.diamonds += cps / 10;
+        updateUI();
+    }
+    checkAchievements();
 }
 
-// CLIQUE
-document.getElementById('main-clicker').onpointerdown = (e) => {
+function calculateCPS() {
+    return UPGRADES.reduce((total, item, index) => {
+        return total + (item.cps * state.inventory[index]);
+    }, 0);
+}
+
+function clickAction() {
+    // Força do clique: 1 + (Nível do Mouse * Poder do Mouse)
     const power = 1 + (state.inventory[0] * UPGRADES[0].click);
     state.diamonds += power;
     state.totalClicks++;
     
-    playSound(400 + (Math.random() * 200));
-    
-    const icon = document.getElementById('cursor-icon');
-    icon.style.transform = 'scale(0.8) rotate(-10deg)';
-    setTimeout(() => icon.style.transform = 'scale(1)', 50);
-
+    playSound('click');
+    createParticle();
     updateUI();
-};
-
-// RENDERIZAR LOJA (Aqui os botões são criados)
-function renderShop() {
-    const list = document.getElementById('upgrades-list');
-    list.innerHTML = ""; // Limpa
-
-    UPGRADES.forEach((u, i) => {
-        const cost = Math.floor(u.cost * Math.pow(1.15, state.inventory[i]));
-        const item = document.createElement('div');
-        item.className = `shop-item ${state.diamonds < cost ? 'locked' : ''}`;
-        item.id = `upgrade-${i}`;
-        item.innerHTML = `
-            <div class="icon"><i class="fas ${u.icon}"></i></div>
-            <div class="info">
-                <b>${u.n}</b>
-                <span>💎 ${format(cost)}</span>
-            </div>
-            <div class="qty">${state.inventory[i]}</div>
-        `;
-        item.onclick = () => buyUpgrade(i);
-        list.appendChild(item);
-    });
 }
 
-function buyUpgrade(idx) {
-    const u = UPGRADES[idx];
-    const cost = Math.floor(u.cost * Math.pow(1.15, state.inventory[idx]));
+function buyItem(index) {
+    const item = UPGRADES[index];
+    const cost = Math.floor(item.base * Math.pow(1.15, state.inventory[index]));
 
     if (state.diamonds >= cost) {
         state.diamonds -= cost;
-        state.inventory[idx]++;
-        playSound(800);
-        renderShop();
+        state.inventory[index]++;
+        playSound('buy');
+        renderShop(); // Atualiza preços
         updateUI();
+        updateColor(); // Checa se muda a cor
     }
 }
 
+// --- VISUAL E UI ---
 function updateUI() {
-    document.getElementById('diamond-display').innerText = format(Math.floor(state.diamonds));
-    const totalCPS = UPGRADES.reduce((acc, u, i) => acc + (u.cps * state.inventory[i]), 0);
-    document.getElementById('cps-display').innerText = format(totalCPS.toFixed(1));
-
-    // CORES (30 Cores baseado no nível do primeiro item)
-    const colorIdx = Math.min(Math.floor(state.inventory[0] / 3), 29);
-    const mainColor = COLORS[colorIdx];
-    document.documentElement.style.setProperty('--primary', mainColor);
-    document.getElementById('chroma-dot').style.background = mainColor;
-
-    // Atualizar estado visual da loja sem re-renderizar tudo
-    UPGRADES.forEach((u, i) => {
-        const cost = Math.floor(u.cost * Math.pow(1.15, state.inventory[i]));
-        const el = document.getElementById(`upgrade-${i}`);
-        if (el) {
-            if (state.diamonds >= cost) el.classList.remove('locked');
-            else el.classList.add('locked');
+    document.getElementById('score-val').innerText = formatNum(Math.floor(state.diamonds));
+    document.getElementById('cps-val').innerText = formatNum(calculateCPS().toFixed(1));
+    
+    // Atualiza estado dos botões da loja (cinza se não puder comprar)
+    UPGRADES.forEach((item, index) => {
+        const cost = Math.floor(item.base * Math.pow(1.15, state.inventory[index]));
+        const btn = document.getElementById(`shop-btn-${index}`);
+        if (btn) {
+            if (state.diamonds >= cost) {
+                btn.classList.remove('disabled');
+            } else {
+                btn.classList.add('disabled');
+            }
         }
     });
 }
 
-function format(n) {
-    if (n >= 1e12) return (n / 1e12).toFixed(2) + "T";
-    if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
-    if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
-    if (n >= 1000) return (n / 1000).toFixed(1) + "K";
-    return n.toLocaleString();
+function renderShop() {
+    const list = document.getElementById('shop-list');
+    list.innerHTML = '';
+    
+    UPGRADES.forEach((item, index) => {
+        const cost = Math.floor(item.base * Math.pow(1.15, state.inventory[index]));
+        
+        const div = document.createElement('div');
+        div.className = `shop-item ${state.diamonds < cost ? 'disabled' : ''}`;
+        div.id = `shop-btn-${index}`;
+        div.innerHTML = `
+            <i class="fas ${item.icon}"></i>
+            <div class="item-info">
+                <b>${item.nome}</b>
+                <span>💎 ${formatNum(cost)}</span>
+            </div>
+            <div class="item-qty">${state.inventory[index]}</div>
+        `;
+        div.onclick = () => buyItem(index);
+        list.appendChild(div);
+    });
 }
 
-// AJUSTES E MODAIS
-document.getElementById('nav-settings').onclick = () => document.getElementById('settings-modal').classList.remove('hidden');
-document.getElementById('nav-rank').onclick = async () => {
-    const m = document.getElementById('rank-modal');
-    m.classList.remove('hidden');
-    const data = await getLeaderboard();
-    document.getElementById('leaderboard-data').innerHTML = data.map((p, i) => `
-        <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #222">
-            <span>#${i + 1} ${p.email.split('@')[0]}</span>
-            <b style="color:var(--primary)">${format(Math.floor(p.diamonds))}</b>
+function updateColor() {
+    // A cada nível do item 0 (Mouse), muda a cor.
+    // Usamos modulo % 30 para ciclar as cores se passar de 30.
+    const colorIndex = state.inventory[0] % COLORS.length;
+    const newColor = COLORS[colorIndex];
+    document.documentElement.style.setProperty('--primary', newColor);
+}
+
+function createParticle() {
+    const zone = document.getElementById('click-zone');
+    const p = document.createElement('span');
+    p.innerText = "+" + (1 + (state.inventory[0] * UPGRADES[0].click));
+    p.style.position = 'absolute';
+    p.style.color = 'var(--primary)';
+    p.style.fontWeight = 'bold';
+    p.style.left = '50%';
+    p.style.top = '50%';
+    p.style.pointerEvents = 'none';
+    p.style.animation = 'floatUp 0.8s ease-out forwards'; // Definir keyframes no CSS se quiser, ou transição simples
+    // Simplificado para JS:
+    p.style.transition = 'all 0.5s';
+    p.style.transform = `translate(-50%, -50%) translate(${Math.random()*40-20}px, -50px)`;
+    p.style.opacity = '0';
+    
+    zone.appendChild(p);
+    setTimeout(() => p.remove(), 500);
+}
+
+// --- SISTEMA E UTILITÁRIOS ---
+function formatNum(num) {
+    if (num >= 1e12) return (num / 1e12).toFixed(2) + "T";
+    if (num >= 1e9) return (num / 1e9).toFixed(2) + "B";
+    if (num >= 1e6) return (num / 1e6).toFixed(2) + "M";
+    if (num >= 1000) return (num / 1000).toFixed(1) + "k";
+    return num.toLocaleString();
+}
+
+function detectDevice() {
+    const isMobile = window.innerWidth < 900;
+    document.getElementById('device-type').innerText = isMobile ? "Mobile" : "PC / Desktop";
+    if (isMobile) {
+        document.body.classList.add('mobile-mode');
+    }
+}
+
+function checkAchievements() {
+    if (state.totalClicks >= 100 && !state.achievements.includes('c1')) unlockAchieve('c1');
+    if (state.diamonds >= 1000000 && !state.achievements.includes('c2')) unlockAchieve('c2');
+}
+
+function unlockAchieve(id) {
+    state.achievements.push(id);
+    const data = ACHIEVEMENTS.find(a => a.id === id);
+    alert(`CONQUISTA DESBLOQUEADA: ${data.nome}`);
+    // Poderia ser um Toast mais bonito
+}
+
+// --- EVENTOS (BUTTONS E INPUTS) ---
+function setupGameButtons() {
+    // Botão de clique
+    const clickZone = document.getElementById('click-zone');
+    clickZone.addEventListener('pointerdown', clickAction); // pointerdown é melhor que click pra mobile
+
+    // Menus Mobile
+    document.getElementById('mob-menu-btn').onclick = () => document.querySelector('.left-panel').classList.toggle('active');
+    document.getElementById('mob-shop-btn').onclick = () => document.querySelector('.right-panel').classList.add('active');
+    document.getElementById('close-shop-mob').onclick = () => document.querySelector('.right-panel').classList.remove('active');
+
+    // Modais
+    document.getElementById('nav-settings').onclick = () => openModal('modal-settings');
+    document.getElementById('nav-rank').onclick = loadLeaderboard;
+    document.getElementById('nav-achieve').onclick = loadAchievements;
+    
+    document.querySelectorAll('.close-modal').forEach(b => {
+        b.onclick = () => document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+    });
+
+    // Configurações
+    const range = document.getElementById('range-size');
+    range.oninput = (e) => {
+        state.settings.size = e.target.value;
+        document.documentElement.style.setProperty('--cursor-size', e.target.value + 'px');
+    };
+    
+    const soundBtn = document.getElementById('toggle-sound');
+    soundBtn.onclick = () => {
+        state.settings.sound = !state.settings.sound;
+        soundBtn.innerText = state.settings.sound ? "ON" : "OFF";
+        soundBtn.className = `toggle-btn ${state.settings.sound ? 'on' : 'off'}`;
+    };
+
+    // Save
+    document.getElementById('btn-cloud-save').onclick = async () => {
+        await saveGame();
+        alert("Jogo salvo!");
+    };
+    document.getElementById('btn-logout').onclick = logout;
+}
+
+function setupAuthButtons() {
+    const err = (msg) => { 
+        const el = document.getElementById('auth-error');
+        el.innerText = msg; el.style.display = 'block'; 
+    };
+
+    document.getElementById('btn-login').onclick = async () => {
+        const e = document.getElementById('inp-email').value;
+        const p = document.getElementById('inp-pass').value;
+        if(!e || !p) return err("Preencha tudo.");
+        const res = await loginUser(e, p);
+        if(res.success) startGame(res.user); else err(res.error);
+    };
+
+    document.getElementById('btn-register').onclick = async () => {
+        const e = document.getElementById('inp-email').value;
+        const p = document.getElementById('inp-pass').value;
+        if(!e || !p) return err("Preencha tudo.");
+        const res = await registerUser(e, p);
+        if(res.success) startGame(res.user); else err(res.error);
+    };
+
+    document.getElementById('btn-anon').onclick = async () => {
+        const res = await loginAnon();
+        if(res.success) startGame(res.user); else err(res.error);
+    };
+    
+    document.getElementById('btn-forgot').onclick = () => openModal('modal-reset');
+    document.getElementById('btn-confirm-reset').onclick = async () => {
+        const email = document.getElementById('reset-email-input').value;
+        await resetPass(email);
+        alert("Verifique seu e-mail.");
+    };
+}
+
+function setupHotkeys() {
+    window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && document.getElementById('auth-screen').style.display === 'none') {
+            clickAction();
+        }
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            saveGame();
+        }
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+        }
+    });
+}
+
+// --- DATA HANDLING ---
+async function startGame(user) {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app-screen').classList.remove('hidden');
+    document.getElementById('display-name').innerText = user.email ? user.email.split('@')[0] : "Visitante";
+
+    // Carregar Save
+    const saved = await loadGameCloud();
+    if (saved) {
+        // Mescla o save com o estado padrão (pra evitar erros se adicionar coisas novas depois)
+        state = { ...state, ...saved };
+        // Aplica configs visuais
+        document.documentElement.style.setProperty('--cursor-size', state.settings.size + 'px');
+        document.getElementById('range-size').value = state.settings.size;
+        updateColor();
+    }
+    
+    renderShop();
+    updateUI();
+}
+
+async function saveGame() {
+    const btn = document.getElementById('last-save-msg');
+    btn.innerText = "Salvando...";
+    await saveGameCloud(state);
+    const now = new Date();
+    btn.innerText = `Salvo às ${now.getHours()}:${now.getMinutes()}`;
+}
+
+async function loadLeaderboard() {
+    openModal('modal-rank');
+    const div = document.getElementById('leaderboard-list');
+    div.innerHTML = "Carregando...";
+    const data = await getLeaderboardData();
+    
+    div.innerHTML = data.map((p, i) => `
+        <div class="leader-row">
+            <span>#${i+1} ${p.name}</span>
+            <span style="color:var(--primary)">${formatNum(p.score)} 💎</span>
         </div>
     `).join('');
-};
+}
 
-window.closeModals = () => {
+function loadAchievements() {
+    openModal('modal-achieve');
+    const div = document.getElementById('achieve-list');
+    div.innerHTML = ACHIEVEMENTS.map(a => {
+        const unlocked = state.achievements.includes(a.id);
+        return `
+            <div class="achieve-item ${unlocked ? 'unlocked' : ''}">
+                <i class="fas fa-trophy"></i>
+                <small>${a.nome}</small>
+            </div>
+        `;
+    }).join('');
+}
+
+function openModal(id) {
     document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
-};
-
-document.getElementById('range-cursor').oninput = (e) => {
-    state.settings.size = e.target.value;
-    document.documentElement.style.setProperty('--cursor-size', e.target.value + 'px');
-};
-
-document.getElementById('toggle-sound').onclick = (e) => {
-    state.settings.sound = !state.settings.sound;
-    e.target.innerText = state.settings.sound ? "ON" : "OFF";
-};
-
-document.getElementById('nav-save').onclick = () => {
-    saveGameData(state);
-    alert("Jogo guardado na nuvem!");
-};
-
-document.getElementById('nav-logout').onclick = () => {
-    auth.signOut();
-    window.location.reload();
-};
+    document.getElementById(id).classList.remove('hidden');
+}
