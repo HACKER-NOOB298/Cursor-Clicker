@@ -1,241 +1,55 @@
 :root {
-    --bg-dark: #0f0f13;
-    --bg-panel: #18181b;
-    --primary: #00d4ff; /* Essa cor muda via JS */
-    --text-main: #ffffff;
-    --text-muted: #a1a1aa;
-    --danger: #ef4444;
-    --success: #22c55e;
-    --border: #27272a;
-    --cursor-size: 120px;
+    --primary: #00f2ff;
+    --bg: #0a0a0c;
+    --panel: #141417;
+    --text: #ffffff;
+    --danger: #ff4d4d;
+    --cursor-scale: 120px;
 }
 
-/* RESET E BASE */
-* { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
-body {
-    background-color: var(--bg-dark);
-    color: var(--text-main);
-    font-family: 'Rajdhani', sans-serif;
-    height: 100vh;
-    overflow: hidden;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent; /* CORREÇÃO CAIXA AZUL */
-}
+* { margin:0; padding:0; box-sizing: border-box; font-family: sans-serif; }
+body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
 
-/* LAYOUT GRID (PC) */
-.app-layout {
-    display: grid;
-    grid-template-columns: 280px 1fr 320px;
-    height: 100vh;
-}
+/* Correção de seleção azul no mobile */
+* { -webkit-tap-highlight-color: transparent; outline: none; }
 
-/* AUTH SCREEN */
-.overlay-full {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999;
-    display: flex; align-items: center; justify-content: center;
-    backdrop-filter: blur(5px);
-}
-.card {
-    background: var(--bg-panel); padding: 2rem; border-radius: 1rem;
-    width: 90%; max-width: 400px; border: 1px solid var(--border);
-    text-align: center; box-shadow: 0 0 40px rgba(0,0,0,0.5);
-}
-.game-title { font-size: 2.5rem; margin-bottom: 0.5rem; }
-.game-title span { color: var(--primary); }
-.input-group {
-    background: #000; border: 1px solid var(--border);
-    margin-bottom: 1rem; padding: 0.8rem; border-radius: 0.5rem;
-    display: flex; align-items: center; gap: 10px;
-}
-.input-group input { background: none; border: none; color: #fff; width: 100%; font-size: 1rem; }
-.error-msg { color: var(--danger); background: rgba(239, 68, 68, 0.1); padding: 0.5rem; margin-bottom: 1rem; border-radius: 4px; font-size: 0.9rem; }
+.hidden { display: none !important; }
 
-/* BOTÕES */
-.btn {
-    width: 100%; padding: 0.8rem; border: none; border-radius: 0.5rem;
-    font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1rem;
-    margin-bottom: 0.5rem;
-}
-.btn.primary { background: var(--primary); color: #000; }
-.btn.primary:hover { filter: brightness(1.2); box-shadow: 0 0 15px var(--primary); }
-.btn.secondary { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
-.btn.danger { background: var(--danger); color: #fff; margin-top: 1rem; }
-.link-btn { background: none; border: none; color: var(--text-muted); text-decoration: underline; cursor: pointer; font-size: 0.8rem; margin: 0 5px; }
+/* Layout Geral */
+#app { display: grid; grid-template-columns: 260px 1fr 300px; height: 100vh; }
 
-/* BARRA LATERAL */
-.sidebar { background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem; }
-.right-panel { border-left: 1px solid var(--border); border-right: none; }
-.profile-box { text-align: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
-.avatar { font-size: 3rem; color: var(--primary); margin-bottom: 0.5rem; }
-.menu button {
-    display: flex; align-items: center; gap: 10px; width: 100%;
-    padding: 1rem; background: none; border: none; color: var(--text-muted);
-    cursor: pointer; transition: 0.2s; text-align: left; font-size: 1.1rem;
-}
-.menu button:hover { color: var(--primary); background: rgba(255,255,255,0.05); border-radius: 8px; }
+.sidebar { background: var(--panel); border: 1px solid #222; display: flex; flex-direction: column; padding: 20px; }
+.left-panel { border-right: 1px solid #333; }
+.right-panel { border-left: 1px solid #333; }
 
-/* ÁREA CENTRAL */
-.game-center {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: radial-gradient(circle at center, #1a1a20 0%, #000 100%);
-    position: relative;
-}
-.scoreboard { position: absolute; top: 40px; display: flex; gap: 4rem; text-align: center; }
-#score-val { font-size: 4rem; font-weight: 800; color: var(--text-main); font-family: 'Roboto Mono', monospace; }
-#cps-val { color: var(--primary); font-size: 1.5rem; }
+/* Perfil e Menus */
+.profile { display: flex; align-items: center; gap: 10px; padding-bottom: 20px; border-bottom: 1px solid #333; margin-bottom: 20px; }
+.avatar { font-size: 40px; color: var(--primary); }
+.tabs button { width: 100%; padding: 12px; margin-bottom: 8px; background: #1c1c21; border: none; color: #aaa; text-align: left; cursor: pointer; border-radius: 6px; }
+.tabs button:hover { background: var(--primary); color: #000; }
 
-.clicker-area {
-    width: 300px; height: 300px; display: flex; align-items: center; justify-content: center;
-    position: relative; cursor: pointer;
-}
-#main-cursor {
-    font-size: var(--cursor-size); color: var(--primary);
-    filter: drop-shadow(0 0 20px var(--primary));
-    transition: transform 0.05s ease;
-}
-#main-cursor:active { transform: scale(0.9); }
+.sidebar-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid #333; }
+.btn-save { width: 100%; background: #22c55e; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+.btn-logout { width: 100%; background: var(--danger); border: none; padding: 10px; border-radius: 5px; cursor: pointer; color: #fff; }
 
-/* LOJA */
-.scroll-content { overflow-y: auto; flex: 1; padding-right: 5px; }
-.shop-item {
-    display: flex; align-items: center; padding: 12px; margin-bottom: 10px;
-    background: #000; border: 1px solid var(--border); border-radius: 8px;
-    cursor: pointer; transition: 0.2s; position: relative; overflow: hidden;
-}
-.shop-item:hover { border-color: var(--primary); transform: translateX(5px); }
-.shop-item.disabled { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; }
-.shop-item i { font-size: 1.5rem; width: 40px; color: var(--primary); }
-.item-info { flex: 1; }
-.item-info b { display: block; font-size: 1rem; }
-.item-info span { font-size: 0.8rem; color: #fbbf24; font-family: 'Roboto Mono'; }
-.item-qty { font-size: 1.2rem; font-weight: bold; padding: 0 10px; color: #52525b; }
+/* Jogo */
+.game-zone { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; background: radial-gradient(circle, #1a1a20, #000); }
+.counters { position: absolute; top: 40px; display: flex; gap: 50px; text-align: center; }
+#main-cursor { font-size: var(--cursor-scale); color: var(--primary); cursor: pointer; transition: 0.1s; filter: drop-shadow(0 0 15px var(--primary)); }
+#main-cursor:active { transform: scale(0.85); }
 
-/* MODAIS */
-.modal {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 5000;
-    display: flex; align-items: center; justify-content: center;
-}
-.modal.hidden { display: none; }
-.modal-content {
-    background: var(--bg-panel); padding: 2rem; width: 90%; max-width: 500px;
-    border: 1px solid var(--primary); border-radius: 12px; max-height: 80vh; overflow-y: auto;
-}
-.leader-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333; }
-.achieve-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
-.achieve-item { background: #000; padding: 10px; border-radius: 5px; text-align: center; opacity: 0.3; }
-.achieve-item.unlocked { opacity: 1; border: 1px solid var(--primary); box-shadow: 0 0 10px var(--primary); }
+/* Loja */
+.shop-list { overflow-y: auto; flex: 1; }
+.shop-item { background: #000; padding: 15px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #222; cursor: pointer; display: flex; justify-content: space-between; }
+.shop-item:hover { border-color: var(--primary); }
+.shop-item.locked { opacity: 0.5; filter: grayscale(1); }
 
-/* RESPONSIVO (MOBILE) */
-.mobile-controls { display: none; }
-.close-mob { display: none; }
-
+/* Mobile */
 @media (max-width: 900px) {
-    .app-layout { grid-template-columns: 1fr; grid-template-rows: 1fr; }
-    .sidebar { position: fixed; inset: 0; z-index: 2000; transform: translateX(-100%); transition: 0.3s; }
-    .sidebar.active { transform: translateX(0); }
-    .right-panel { transform: translateX(100%); border-left: none; }
-    
-    .mobile-controls {
-        position: absolute; bottom: 20px; display: flex; gap: 20px; width: 100%;
-        justify-content: center; z-index: 100;
-    }
-    .mobile-controls button {
-        background: var(--bg-panel); border: 1px solid var(--primary); color: #fff;
-        padding: 10px 20px; border-radius: 30px; font-weight: bold;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    }
-    .close-mob { display: block; background: none; border: none; color: #fff; font-size: 1.5rem; }
-    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    #app { grid-template-columns: 1fr; }
+    .left-panel, .right-panel { position: fixed; inset: 0; z-index: 100; transform: translateX(-100%); transition: 0.3s; }
+    .right-panel { transform: translateX(100%); }
+    .active { transform: translateX(0) !important; }
+    .mob-nav { position: absolute; bottom: 30px; display: flex; gap: 20px; }
+    .mob-nav button { background: var(--panel); border: 1px solid var(--primary); color: #fff; padding: 12px 25px; border-radius: 50px; }
 }
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-/* --- ATUALIZAÇÃO DA BARRA LATERAL --- */
-
-.sidebar {
-    background: var(--bg-panel);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    padding: 1.5rem;
-    /* Isso garante que o topo fique no topo e o fundo no fundo */
-    justify-content: flex-start; 
-}
-
-/* Perfil com menos margem para subir os botões */
-.profile-box {
-    text-align: center;
-    margin-bottom: 1.5rem; /* Reduzi a margem */
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border);
-    margin-top: 20px; /* Espaço para o botão fechar no mobile */
-}
-
-/* O menu ocupa o espaço disponível, empurrando o resto pra baixo, mas ficando no topo */
-.menu {
-    flex: 1; 
-    display: flex;
-    flex-direction: column;
-    gap: 10px; /* Espaço entre botões do menu */
-}
-
-.menu button {
-    padding: 0.8rem; /* Botões mais compactos */
-}
-
-/* Área inferior fixa */
-.bottom-actions {
-    margin-top: auto; /* Empurra para o final da barra */
-    border-top: 1px solid var(--border);
-    padding-top: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-/* Estilo do botão Sair e Salvar */
-.btn.small {
-    padding: 0.6rem;
-    font-size: 0.9rem;
-    width: 100%;
-}
-
-.save-status {
-    text-align: center;
-    margin-bottom: 5px;
-}
-.save-status small {
-    display: block;
-    margin-bottom: 5px;
-    color: var(--text-muted);
-    font-size: 0.75rem;
-}
-
-/* --- BOTÃO FECHAR NO MOBILE --- */
-.close-mob-btn {
-    display: none; /* Escondido no PC */
-}
-
-@media (max-width: 900px) {
-    .close-mob-btn {
-        display: block;
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: transparent;
-        border: 1px solid var(--danger);
-        color: var(--danger);
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        font-size: 1.2rem;
-        cursor: pointer;
-        z-index: 10;
-    }
-    
-    .profile-box {
-        margin-top: 30px; /* Mais espaço no mobile pra não bater no X */
-    }
-}
-
