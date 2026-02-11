@@ -5,86 +5,145 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cursor Clicker v2.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="auth-screen" class="overlay">
-        <div class="auth-box">
-            <h1>CURSOR<span>V2</span></h1>
-            <div id="auth-error" class="err-msg"></div>
-            <input type="email" id="email" placeholder="E-mail">
-            <input type="password" id="password" placeholder="Senha">
-            <div class="auth-row">
-                <button id="btn-login" class="btn-p">ENTRAR</button>
-                <button id="btn-reg" class="btn-s">REGISTRAR</button>
+    <div id="toast-area"></div>
+
+    <div id="auth-screen" class="overlay-full">
+        <div class="card auth-card">
+            <h1 class="game-title">CURSOR <span>CLICKER v2</span></h1>
+            <p class="subtitle">Faça login para salvar na nuvem e competir.</p>
+            
+            <p id="auth-error" class="error-msg" style="display:none"></p>
+
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="inp-email" placeholder="E-mail">
             </div>
-            <button id="btn-anon" class="btn-link">Entrar como Convidado</button>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="inp-pass" placeholder="Senha">
+            </div>
+
+            <div class="row-btn">
+                <button id="btn-login" class="btn primary">ENTRAR</button>
+                <button id="btn-register" class="btn secondary">CRIAR CONTA</button>
+            </div>
+            
+            <div class="extra-opts">
+                <button id="btn-anon" class="link-btn">Jogar sem conta</button>
+                <button id="btn-forgot" class="link-btn">Esqueci a senha</button>
+            </div>
         </div>
     </div>
 
-    <main id="app" class="hidden">
+    <main id="app-screen" class="app-layout hidden">
+        
         <aside class="sidebar left-panel">
-            <button id="close-menu-mob" class="close-mob-btn"><i class="fas fa-times"></i></button>
-            <div class="profile">
-                <i class="fas fa-circle-user avatar"></i>
-                <div class="user-meta">
-                    <b id="user-display">Jogador</b>
-                    <small id="device-info">PC Mode</small>
+            <div class="profile-box">
+                <div class="avatar"><i class="fas fa-user-astronaut"></i></div>
+                <div class="user-info">
+                    <span id="display-name">Carregando...</span>
+                    <small id="device-type">Detectando...</small>
                 </div>
             </div>
 
-            <nav class="tabs">
-                <button onclick="showTab('rank')"><i class="fas fa-trophy"></i> LEADERBOARD</button>
-                <button onclick="showTab('achievements')"><i class="fas fa-medal"></i> CONQUISTAS</button>
-                <button onclick="showTab('settings')"><i class="fas fa-cog"></i> AJUSTES</button>
+            <nav class="menu">
+                <button id="nav-rank"><i class="fas fa-trophy"></i> Leaderboard</button>
+                <button id="nav-achieve"><i class="fas fa-medal"></i> Conquistas</button>
+                <button id="nav-settings"><i class="fas fa-cog"></i> Configurações</button>
             </nav>
 
-            <div class="sidebar-footer">
-                <div class="save-box">
-                    <small id="save-msg">Cloud: Sync...</small>
-                    <button id="btn-manual-save" class="btn-save">SALVAR AGORA</button>
-                </div>
-                <button id="btn-logout-sidebar" class="btn-logout">SAIR DA CONTA</button>
+            <div class="save-status">
+                <button id="btn-cloud-save" class="btn small"><i class="fas fa-cloud-upload-alt"></i> Salvar Agora</button>
+                <small id="last-save-msg">Não salvo.</small>
             </div>
         </aside>
 
-        <section class="game-zone">
-            <div class="counters">
-                <div class="count-block">
+        <section class="game-center">
+            <div class="scoreboard">
+                <div class="score-item">
                     <small>DIAMANTES</small>
-                    <h2 id="diamonds">0</h2>
+                    <span id="score-val">0</span>
                 </div>
-                <div class="count-block">
+                <div class="score-item">
                     <small>POR SEGUNDO</small>
-                    <h3 id="cps">0</h3>
+                    <span id="cps-val">0.0</span>
                 </div>
             </div>
 
-            <div id="click-area">
-                <i class="fas fa-mouse-pointer" id="main-cursor"></i>
+            <div id="click-zone" class="clicker-area">
+                <i id="main-cursor" class="fas fa-mouse-pointer"></i>
+                <div id="click-particles"></div>
             </div>
 
-            <div class="mob-nav">
-                <button id="mob-menu"><i class="fas fa-bars"></i> MENU</button>
-                <button id="mob-shop"><i class="fas fa-shopping-cart"></i> LOJA</button>
+            <div class="mobile-controls">
+                <button id="mob-menu-btn"><i class="fas fa-bars"></i> Menu</button>
+                <button id="mob-shop-btn"><i class="fas fa-shopping-cart"></i> Loja</button>
             </div>
         </section>
 
-        <aside class="sidebar right-panel" id="shop-sidebar">
-            <div class="shop-head">LOJA DE EVOLUÇÕES</div>
-            <div id="shop-items" class="shop-list"></div>
+        <aside class="sidebar right-panel" id="shop-panel">
+            <div class="panel-header">
+                <h3>LOJA DE EVOLUÇÃO</h3>
+                <small>15 Upgrades Disponíveis</small>
+                <button id="close-shop-mob" class="close-mob"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="shop-list" class="scroll-content">
+                </div>
         </aside>
     </main>
 
-    <div id="modal-container" class="modal hidden">
+    <div id="modal-settings" class="modal hidden">
         <div class="modal-content">
-            <button class="close-modal">&times;</button>
-            <div id="modal-body"></div>
+            <h2>Configurações</h2>
+            <div class="setting-row">
+                <label>Efeitos Sonoros</label>
+                <button id="toggle-sound" class="toggle-btn on">ON</button>
+            </div>
+            <div class="setting-row">
+                <label>Tamanho do Cursor</label>
+                <input type="range" id="range-size" min="50" max="200" value="120">
+            </div>
+            <div class="info-block">
+                <h4>Atalhos (PC)</h4>
+                <p><code>Espaço</code> Clicar</p>
+                <p><code>Ctrl+S</code> Salvar</p>
+                <p><code>ESC</code> Fechar Janelas</p>
+            </div>
+            <button class="btn danger" id="btn-logout">Sair da Conta</button>
+            <button class="btn secondary close-modal">Fechar</button>
         </div>
     </div>
 
-    <script type="module" src="cdn.js"></script>
-<script type="module" src="script.js"></script>
+    <div id="modal-rank" class="modal hidden">
+        <div class="modal-content">
+            <h2>🏆 Top Jogadores</h2>
+            <div id="leaderboard-list">Carregando...</div>
+            <button class="btn secondary close-modal">Fechar</button>
+        </div>
+    </div>
+
+    <div id="modal-achieve" class="modal hidden">
+        <div class="modal-content">
+            <h2>🏅 Conquistas</h2>
+            <div id="achieve-list" class="achieve-grid"></div>
+            <button class="btn secondary close-modal">Fechar</button>
+        </div>
+    </div>
+
+    <div id="modal-reset" class="modal hidden">
+        <div class="modal-content">
+            <h3>Recuperar Senha</h3>
+            <input type="email" id="reset-email-input" placeholder="Seu e-mail">
+            <button id="btn-confirm-reset" class="btn primary">Enviar</button>
+            <button class="btn secondary close-modal">Cancelar</button>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
 </body>
 </html>
